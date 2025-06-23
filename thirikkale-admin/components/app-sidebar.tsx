@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
 import {
   AudioWaveform,
   BookOpen,
@@ -12,19 +13,65 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  Users,
+  Shield,
+  Home,
+  Car,
+  MapPinned,
+  HandCoins,
+  ChartColumn,
+  ChartColumnBig,
+  Settings,
+  UserRoundCheck,
+  Star,
+  Headset,
+  UserCog,
+  Activity,
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
-import { TeamSwitcher } from "@/components/team-switcher"
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
 } from "@/components/ui/sidebar"
+
+type UserType = "admin" | "RiderSupport" | "DriverSupport"
+
+const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.ElementType }[]> = {
+  admin: [
+    { title: "Dashboard", url: "#", icon: Home },
+    { title: "User Management", url: "#", icon: Users },
+    { title: "Driver Management", url: "#", icon: Settings2 },
+    { title: "Ride Management", url: "#", icon: MapPinned },
+    { title: "Pricing", url: "#", icon: HandCoins },
+    { title: "Analytics", url: "#", icon: ChartColumn },
+    { title: "System Settings", url: "#", icon: Settings },
+  ],
+  RiderSupport: [
+    { title: "Dashboard", url: "#", icon: Home },
+    { title: "Rider Verification", url: "#", icon: UserRoundCheck },
+    { title: "Ratings & Reviews", url: "#", icon: Star },
+    { title: "Support Tickets", url: "#", icon: Headset },
+    { title: "Account Management", url: "#", icon: UserCog },
+    { title: "Activity Feed", url: "#", icon: Activity },
+  ],
+  DriverSupport: [
+    { title: "Dashboard", url: "#", icon: Home },
+    { title: "Document Verification", url: "#", icon: UserRoundCheck },
+    { title: "Driver Performance", url: "#", icon: Star },
+    { title: "Support Tickets", url: "#", icon: Headset },
+    { title: "Account Management", url: "#", icon: UserCog },
+    { title: "Activity Feed", url: "#", icon: Activity },
+  ],
+}
 
 // This is sample data.
 const data = {
@@ -32,139 +79,45 @@ const data = {
     name: "shadcn",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
-  },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-  navMain: [
-    {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+  }
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  userType = "admin",
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { userType?: UserType }) {
+  const items = sidebarConfig[userType] || []
+
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
-        <TeamSwitcher teams={data.teams} />
+      <SidebarHeader className="pb-0">
+        <Image
+          src="/ThirikkaleMain.svg"
+          alt="App Logo"
+          width={150}
+          height={0}
+          style={{ width: 150, height: "auto", marginRight: 8 }}
+          priority
+          className="self-center ml-2"
+        />
+        {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        <SidebarGroup  className="pt-0">
+          <SidebarMenu>
+            {items.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton asChild>
+                  <a href={item.url}>
+                    <item.icon />
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
