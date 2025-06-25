@@ -28,6 +28,7 @@ import {
   UserCog,
   Activity,
 } from "lucide-react"
+import { usePathname, useSearchParams } from "next/navigation"
 
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
@@ -47,29 +48,29 @@ type UserType = "admin" | "RiderSupport" | "DriverSupport"
 
 const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.ElementType }[]> = {
   admin: [
-    { title: "Dashboard", url: "#", icon: Home },
-    { title: "User Management", url: "#", icon: Users },
-    { title: "Driver Management", url: "#", icon: Settings2 },
-    { title: "Ride Management", url: "#", icon: MapPinned },
-    { title: "Pricing", url: "#", icon: HandCoins },
-    { title: "Analytics", url: "#", icon: ChartColumn },
-    { title: "System Settings", url: "#", icon: Settings },
+    { title: "Dashboard", url: "dashboard?tab=admin", icon: Home },
+    { title: "User Management", url: "dashboard?tab=user-management", icon: Users },
+    { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
+    { title: "Ride Management", url: "dashboard?tab=ride-management", icon: MapPinned },
+    { title: "Pricing", url: "dashboard?tab=pricing", icon: HandCoins },
+    { title: "Analytics", url: "dashboard?tab=analytics", icon: ChartColumn },
+    { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
   ],
   RiderSupport: [
-    { title: "Dashboard", url: "#", icon: Home },
-    { title: "Rider Verification", url: "#", icon: UserRoundCheck },
-    { title: "Ratings & Reviews", url: "#", icon: Star },
-    { title: "Support Tickets", url: "#", icon: Headset },
-    { title: "Account Management", url: "#", icon: UserCog },
-    { title: "Activity Feed", url: "#", icon: Activity },
+    { title: "Dashboard", url: "dashboard?tab=rider-support", icon: Home },
+    { title: "Rider Verification", url: "dashboard?tab=rider-verification", icon: UserRoundCheck },
+    { title: "Ratings & Reviews", url: "dashboard?tab=ratings-reviews", icon: Star },
+    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
+    { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
+    { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
   ],
   DriverSupport: [
-    { title: "Dashboard", url: "#", icon: Home },
-    { title: "Document Verification", url: "#", icon: UserRoundCheck },
-    { title: "Driver Performance", url: "#", icon: Star },
-    { title: "Support Tickets", url: "#", icon: Headset },
-    { title: "Account Management", url: "#", icon: UserCog },
-    { title: "Activity Feed", url: "#", icon: Activity },
+    { title: "Dashboard", url: "dashboard?tab=driver-support", icon: Home },
+    { title: "Document Verification", url: "dashboard?tab=document-verification", icon: UserRoundCheck },
+    { title: "Driver Performance", url: "dashboard?tab=driver-performance", icon: Star },
+    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
+    { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
+    { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
   ],
 }
 
@@ -87,6 +88,20 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { userType?: UserType }) {
   const items = sidebarConfig[userType] || []
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // Get the full path with query string
+  const fullPath = React.useMemo(() => {
+    const params = searchParams.toString()
+    return params ? `${pathname}?${params}` : pathname
+  }, [pathname, searchParams])
+
+  // Helper to check if the tab is active
+  const isActive = (url: string) => {
+    // Compare only after the first slash, since your URLs are relative
+    return fullPath.endsWith(url)
+  }
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -103,12 +118,19 @@ export function AppSidebar({
         {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup  className="pt-0">
+        <SidebarGroup className="pt-0">
           <SidebarMenu>
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton asChild>
-                  <a href={item.url}>
+                    <a
+                    href={item.url}
+                    className={
+                      isActive(item.url)
+                      ? "bg-blue-400 text-primary"
+                      : undefined
+                    }
+                    >
                     <item.icon />
                     <span>{item.title}</span>
                   </a>

@@ -8,6 +8,9 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react"
+import { signOut } from "next-auth/react"
+import { useState } from "react" // Add useState
+import { Loader } from "@/components/ui/loader" // Import Loader component
 
 import {
   Avatar,
@@ -40,6 +43,18 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const [isLoggingOut, setIsLoggingOut] = useState(false) // Add state for tracking logout
+
+  // Function to handle sign out
+  const handleSignOut = async () => {
+    setIsLoggingOut(true) // Set loading state
+    try {
+      await signOut({ callbackUrl: "/login" })
+    } catch (error) {
+      console.error("Logout error:", error)
+      setIsLoggingOut(false) // Reset on error
+    }
+  }
 
   return (
     <SidebarMenu>
@@ -102,9 +117,22 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <LogOut />
-              Log out
+            <DropdownMenuItem 
+              onClick={handleSignOut}
+              disabled={isLoggingOut}
+              className="relative"
+            >
+              {isLoggingOut ? (
+                <div className="flex items-center">
+                  <Loader size="sm" />
+                  <span className="ml-2">Logging out...</span>
+                </div>
+              ) : (
+                <>
+                  <LogOut />
+                  <span className="ml-2">Log out</span>
+                </>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

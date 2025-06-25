@@ -1,9 +1,9 @@
-"use client"
 import { GalleryVerticalEnd } from "lucide-react"
 import Image from "next/image"
 import { LoginForm } from "@/components/login-form"
+import { ResetForm } from "@/components/reset-form"
 
-export default function LoginPage() {
+export default function ResetPage() {
   return (
     <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-2">
@@ -21,7 +21,7 @@ export default function LoginPage() {
             className="self-center ml-2"
           />
         </a>
-        <LoginForm />
+        <ResetForm />
       </div>
     </div>
   )

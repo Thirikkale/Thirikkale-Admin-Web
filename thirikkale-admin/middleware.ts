@@ -1,0 +1,34 @@
+import { NextResponse } from 'next/server'
+import { getToken } from 'next-auth/jwt'
+import { NextRequest } from 'next/server'
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  
+  // Exclude paths that should be publicly accessible
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api/auth') ||
+    pathname === '/login' ||
+    pathname === '/reset-password'
+  ) {
+    return NextResponse.next()
+  }
+
+  // Check if user is authenticated
+  const token = await getToken({ req: request })
+  
+  if (!token) {
+    // Redirect to login if not authenticated
+    const url = new URL('/login', request.url)
+    url.searchParams.set('callbackUrl', encodeURI(pathname))
+    return NextResponse.redirect(url)
+  }
+
+  return NextResponse.next()
+}
+
+export const config = {
+  // Specify which paths to run middleware on
+  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico|login|reset-password).*)'],
+}
