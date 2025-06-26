@@ -53,6 +53,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret-here",
   session: {
     strategy: "jwt",
   },

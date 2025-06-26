@@ -15,8 +15,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // Check if user is authenticated
-  const token = await getToken({ req: request })
+  // Check if user is authenticated - pass the secret explicitly
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret-here" 
+  })
   
   if (!token) {
     // Redirect to login if not authenticated
