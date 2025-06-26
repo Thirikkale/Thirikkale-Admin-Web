@@ -48,7 +48,7 @@ type UserType = "admin" | "RiderSupport" | "DriverSupport"
 
 const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.ElementType }[]> = {
   admin: [
-    { title: "Dashboard", url: "dashboard?tab=admin", icon: Home },
+    { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "User Management", url: "dashboard?tab=user-management", icon: Users },
     { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
     { title: "Ride Management", url: "dashboard?tab=ride-management", icon: MapPinned },
@@ -57,7 +57,7 @@ const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.
     { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
   ],
   RiderSupport: [
-    { title: "Dashboard", url: "dashboard?tab=rider-support", icon: Home },
+    { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "Rider Verification", url: "dashboard?tab=rider-verification", icon: UserRoundCheck },
     { title: "Ratings & Reviews", url: "dashboard?tab=ratings-reviews", icon: Star },
     { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
@@ -65,7 +65,7 @@ const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.
     { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
   ],
   DriverSupport: [
-    { title: "Dashboard", url: "dashboard?tab=driver-support", icon: Home },
+    { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "Document Verification", url: "dashboard?tab=document-verification", icon: UserRoundCheck },
     { title: "Driver Performance", url: "dashboard?tab=driver-performance", icon: Star },
     { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
@@ -99,8 +99,16 @@ export function AppSidebar({
 
   // Helper to check if the tab is active
   const isActive = (url: string) => {
-    // Compare only after the first slash, since your URLs are relative
-    return fullPath.endsWith(url)
+    // For Dashboard, make it active if it's the exact path or if no other tab is active
+    // if (url === "dashboard?tab=admin" || 
+    //     url === "dashboard?tab=rider-support" || 
+    //     url === "dashboard?tab=driver-support") {
+    //   // If pathname is just "/dashboard" with no query params or the matching tab
+    //   return pathname === "/dashboard" || fullPath.endsWith(url);
+    // }
+    
+    // For other items, check if the URL ends with this item's URL
+    return fullPath.endsWith(url);
   }
 
   return (
