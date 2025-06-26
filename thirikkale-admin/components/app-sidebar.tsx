@@ -28,6 +28,7 @@ import {
   UserCog,
   Activity,
 } from "lucide-react"
+import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
 
 import { NavProjects } from "@/components/nav-projects"
@@ -44,10 +45,10 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
 
-type UserType = "admin" | "RiderSupport" | "DriverSupport"
+type UserType = "Admin" | "RiderSupport" | "DriverSupport"
 
 const sidebarConfig: Record<UserType, { title: string; url: string; icon: React.ElementType }[]> = {
-  admin: [
+  Admin: [
     { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "User Management", url: "dashboard?tab=user-management", icon: Users },
     { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
@@ -84,18 +85,22 @@ const data = {
 }
 
 export function AppSidebar({
-  userType = "admin",
+  userType = "Admin",
   ...props
 }: React.ComponentProps<typeof Sidebar> & { userType?: UserType }) {
   const items = sidebarConfig[userType] || []
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const sidebarContext = useSidebar( );
+  const isCollapsed = sidebarContext.state === "expanded" ? false : true;
 
   // Get the full path with query string
   const fullPath = React.useMemo(() => {
     const params = searchParams.toString()
     return params ? `${pathname}?${params}` : pathname
   }, [pathname, searchParams])
+
+
 
   // Helper to check if the tab is active
   const isActive = (url: string) => {
@@ -113,16 +118,29 @@ export function AppSidebar({
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="pb-0">
-        <Image
-          src="/ThirikkaleMain.svg"
-          alt="App Logo"
-          width={150}
-          height={0}
-          style={{ width: 150, height: "auto", marginRight: 8 }}
-          priority
-          className="self-center ml-2"
-        />
+      <SidebarHeader className="pb-0 flex justify-center">
+        <div
+          style={{
+            transition: "opacity 0.3s, width 0.3s",
+            opacity: isCollapsed ? 0 : 1,
+            width: isCollapsed ? 0 : "100%",
+            overflow: "hidden",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          >
+          {!isCollapsed && (
+            <Image
+              src="/ThirikkaleMain.svg"
+              alt="App Logo"
+              width={150}
+              height={0}
+              style={{ width: 150, height: "auto" }}
+              priority
+            />
+          )}
+        </div>
         {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>
