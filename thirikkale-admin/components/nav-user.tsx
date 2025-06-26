@@ -9,8 +9,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
-import { useState } from "react" // Add useState
-import { Loader } from "@/components/ui/loader" // Import Loader component
+import { useLoading } from "@/components/providers/LoaderProvider"
 
 import {
   Avatar,
@@ -43,17 +42,18 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const [isLoggingOut, setIsLoggingOut] = useState(false) // Add state for tracking logout
+  const { startLoading, stopLoading } = useLoading()
 
   // Function to handle sign out
   const handleSignOut = async () => {
-    setIsLoggingOut(true) // Set loading state
+    startLoading() // Start the full-screen loading
     try {
       await signOut({ callbackUrl: "/login" })
     } catch (error) {
       console.error("Logout error:", error)
-      setIsLoggingOut(false) // Reset on error
+      stopLoading() // Stop loading on error
     }
+    // No need to call stopLoading() on success since we'll redirect
   }
 
   return (
@@ -117,22 +117,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={handleSignOut}
-              disabled={isLoggingOut}
-              className="relative"
-            >
-              {isLoggingOut ? (
-                <div className="flex items-center">
-                  <Loader size="sm" />
-                  <span className="ml-2">Logging out...</span>
-                </div>
-              ) : (
-                <>
-                  <LogOut />
-                  <span className="ml-2">Log out</span>
-                </>
-              )}
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut />
+              <span className="ml-2">Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
