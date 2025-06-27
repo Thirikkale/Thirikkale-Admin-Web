@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function UserManagement() {
+export default function ActivityFeed() {
   return (
     <div>
-      UserManagement
+      ActivityFeed
     </div>
   )
 }

@@ -91,7 +91,7 @@ export function AppSidebar({
   const items = sidebarConfig[userType] || []
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const sidebarContext = useSidebar( );
+  const sidebarContext = useSidebar();
   const isCollapsed = sidebarContext.state === "expanded" ? false : true;
 
   // Get the full path with query string

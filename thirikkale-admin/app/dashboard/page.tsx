@@ -13,32 +13,40 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { LoadingProvider } from "@/components/providers/LoaderProvider"
 import { useSearchParams } from "next/navigation"
 import { Home, Users, Settings2, MapPinned, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
+import Dash from "@/components/dashboards/Dash"
 
+// Admin components
+import Analytics from "@/components/dashboards/admin/Analytics"
+import DriverManagement from "@/components/dashboards/admin/DriverManagement"
+import Pricing from "@/components/dashboards/admin/Pricing"
+import RideManagement from "@/components/dashboards/admin/RideManagement"
+import SystemSettings from "@/components/dashboards/admin/SystemSettings"
+import UserManagement from "@/components/dashboards/admin/UserManagement"
+
+// driver support components
+import DriverAccountManagement from "@/components/dashboards/driver-support/AccountManagement"
+import DriverActivityFeed from "@/components/dashboards/driver-support/ActivityFeed"
+import DriverDocumentVerification from "@/components/dashboards/driver-support/DocumentVerification"
+import DriverPerformance from "@/components/dashboards/driver-support/DriverPerformance"
+import DiverSupportTicket from "@/components/dashboards/driver-support/SupportTicket"
+
+// rider support components
+import RiderAccountManagement from "@/components/dashboards/rider-support/AccountManagement"
+import RiderActivityFeed from "@/components/dashboards/rider-support/ActivityFeed"
+import RiderRatingsAndReviews from "@/components/dashboards/rider-support/RatingsAndReviews"
+import RiderVerification from "@/components/dashboards/rider-support/RiderVerification"
+import RiderSupportTickets from "@/components/dashboards/rider-support/SupportTickets"
 
 export default function Page() {
-  // Move ALL hooks to the top before any conditional logic
+  // ALL HOOKS MUST BE AT THE TOP - NO CONDITIONAL LOGIC BEFORE HOOKS
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login")
-    }
-  }, [status, router])
+  // Get userType from session
+  const userType = session?.user?.userType
+  const tab = searchParams.get("tab") || "dashboard"
 
-  // Show loading state AFTER all hooks are declared
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader size="lg" text="Loading..." />
-      </div>
-    )
-  }
-
-  // Get userType from session or default to "Admin" if not available
-  const userType = session?.user?.userType || "Admin"
-  
   // Map userType to available tabs
   const tabConfig = {
     Admin: [
@@ -68,8 +76,7 @@ export default function Page() {
     ],
   } as const
 
-  const tab = searchParams.get("tab") || "dashboard"
-  const tabs = tabConfig[userType as keyof typeof tabConfig]
+  const tabs = userType ? tabConfig[userType as keyof typeof tabConfig] : []
 
   // Find the current tab config
   const currentTab = tabs.find(t =>
@@ -78,39 +85,117 @@ export default function Page() {
       : t.url.endsWith(`tab=${tab}`)
   ) || tabs[0]
 
-  // Render different components based on currentTab.title
+  // FIRST useEffect: Authentication check
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login")
+    }
+  }, [status, router])
+
+  // SECOND useEffect: Redirect if no userType
+  useEffect(() => {
+    if (status !== "loading" && !userType) {
+      router.push("/login")
+    }
+  }, [status, userType, router])
+
+  // THIRD useEffect: Tab validation
+  useEffect(() => {
+    if (userType && tab !== "dashboard" && tabs.length > 0) {
+      const isValidTab = tabs.some(t => 
+        t.url.endsWith(`tab=${tab}`)
+      )
+      
+      if (!isValidTab) {
+        router.push("/dashboard")
+      }
+    }
+  }, [tab, tabs, router, userType])
+
+  // NOW we can have conditional returns AFTER all hooks
+  if (status === "loading") {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader size="lg" text="Loading..." />
+      </div>
+    )
+  }
+
+  if (!userType) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader size="lg" text="Redirecting..." />
+      </div>
+    )
+  }
+
+  // Render different components based on currentTab.title and userType
   const renderTabComponent = () => {
+    if (!currentTab) return <Dash />
+
     switch (currentTab.title) {
       case "Dashboard":
-        return <div>Dashboard Content</div>
+        return <Dash />
+      
+      // Admin-only components
       case "User Management":
-        return <div>User Management Content</div>
+        return userType === "Admin" ? <UserManagement /> : <Dash />
       case "Driver Management":
-        return <div>Driver Management Content</div>
+        return userType === "Admin" ? <DriverManagement /> : <Dash />
       case "Ride Management":
-        return <div>Ride Management Content</div>
+        return userType === "Admin" ? <RideManagement /> : <Dash />
       case "Pricing":
-        return <div>Pricing Content</div>
+        return userType === "Admin" ? <Pricing /> : <Dash />
       case "Analytics":
-        return <div>Analytics Content</div>
+        return userType === "Admin" ? <Analytics /> : <Dash />
       case "System Settings":
-        return <div>System Settings Content</div>
+        return userType === "Admin" ? <SystemSettings /> : <Dash />
+      
+      // Rider Support components
       case "Rider Verification":
-        return <div>Rider Verification Content</div>
+        return userType === "RiderSupport" ? <RiderVerification /> : <Dash />
       case "Ratings & Reviews":
-        return <div>Ratings & Reviews Content</div>
-      case "Support Tickets":
-        return <div>Support Tickets Content</div>
-      case "Account Management":
-        return <div>Account Management Content</div>
-      case "Activity Feed":
-        return <div>Activity Feed Content</div>
+        return userType === "RiderSupport" ? <RiderRatingsAndReviews /> : <Dash />
+      
+      // Driver Support components
       case "Document Verification":
-        return <div>Document Verification Content</div>
+        return userType === "DriverSupport" ? <DriverDocumentVerification /> : <Dash />
       case "Driver Performance":
-        return <div>Driver Performance Content</div>
+        return userType === "DriverSupport" ? <DriverPerformance /> : <Dash />
+      
+      // Shared components that need user-type specific handling
+      case "Support Tickets":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderSupportTickets />
+          case "DriverSupport":
+            return <DiverSupportTicket />
+          default:
+            return <Dash />
+        }
+      
+      case "Account Management":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderAccountManagement />
+          case "DriverSupport":
+            return <DriverAccountManagement />
+          default:
+            return <Dash />
+        }
+      
+      case "Activity Feed":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderActivityFeed />
+          case "DriverSupport":
+            return <DriverActivityFeed />
+          default:
+            return <Dash />
+        }
+      
       default:
-        return <div>Dashboard Content</div>
+        return <Dash />
     }
   }
 
@@ -125,7 +210,6 @@ export default function Page() {
             </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {/* Render the appropriate tab component */}
             {renderTabComponent()}
           </div>
         </SidebarInset>

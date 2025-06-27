@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function UserManagement() {
+export default function Analytics() {
   return (
     <div>
-      UserManagement
+      Analytics
     </div>
   )
 }
