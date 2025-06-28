@@ -1,81 +1,104 @@
+// app/api/auth/[...nextauth]/route.ts (or similar file depending on your setup)
+
 import NextAuth from "next-auth"
 import { DefaultSession } from "next-auth"
 import { ZodError } from "zod"
 import Credentials from "next-auth/providers/credentials"
-import { signInSchema } from "./lib/zod"
-import { saltAndHashPassword } from "@/utils/password"
-import { getAuthDetails } from "@/utils/db"
+import { signInSchema } from "@/lib/zod" // Zod schema to validate login form
+import { saltAndHashPassword } from "@/utils/password" // Optional: to hash passwords
 import type { Session, User } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 
-// // Add userType to the Session type
-// declare module "next-auth" {
-//   interface Session {
-//     userType?: string
-//     jwt?: string
-//     user: {
-//       userType?: string
-//     } & DefaultSession["user"]
-//   }
-// }
-
+// ✅ Initialize NextAuth
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    // ✅ Use credentials-based login
     Credentials({
       credentials: {
-        email: {},
-        password: {},
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
         try {
-          console.log("Credentials received:", credentials)
+          console.log("Received credentials:", credentials)
+
+          // ✅ Validate with Zod
           const { email, password } = await signInSchema.parseAsync(credentials)
-          const testUser = { email: 'test@gmail.com', password: 'test' } // Example test user
-        
-          // Check against test user
-          if (email === testUser.email && password === testUser.password) {
-            const hashedPassword = await saltAndHashPassword(testUser.password)
-            
-            const userDetails = { 
-              email: testUser.email, 
-              password: hashedPassword, 
-              jwt: "test-jwt-token",
-              userType: ["Admin", "RiderSupport", "DriverSupport"][Math.floor(Math.random() * 3)] // Assign a random userType
-            };
-            console.log("User details : ", userDetails);
-            return userDetails;
+
+          // ✅ Simulated users
+          const mockUsers = [
+            {
+              email: "admin@gmail.com",
+              password: "123", // Plaintext for mock; use hash check in real use
+              userType: "Admin",
+            },
+            {
+              email: "rider@gmail.com",
+              password: "123",
+              userType: "RiderSupport",
+            },
+            {
+              email: "driver@gmail.com",
+              password: "123",
+              userType: "DriverSupport",
+            },
+          ]
+
+          // ✅ Find matching user
+          const foundUser = mockUsers.find(
+            (user) => user.email === email && user.password === password
+          )
+
+          if (!foundUser) {
+            console.warn("Invalid credentials")
+            return null
           }
-          return null
+
+          // ✅ Optional: simulate hashing (not used in mock check)
+          const hashedPassword = await saltAndHashPassword(foundUser.password)
+
+          const userDetails = {
+            id: foundUser.email, // NextAuth requires an id field
+            email: foundUser.email,
+            userType: foundUser.userType,
+            jwt: "test-jwt-token", // Mock token for testing
+          }
+
+          console.log("Authorized user:", userDetails)
+          return userDetails
         } catch (error) {
-          console.error("Auth error:", error)
+          console.error("Authorization error:", error)
           return null
         }
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret-here",
+
+  // ✅ Fallback secret for JWT
+  secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret",
+
   session: {
-    strategy: "jwt",
+    strategy: "jwt", // Use JWT-based session (stateless)
   },
+
   callbacks: {
+    // ✅ Called when JWT is created/updated
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        // Transfer user properties to token
         token.jwt = (user as any).jwt
         token.userType = (user as any).userType
       }
       return token
     },
+
+    // ✅ Called whenever a session is checked on the client
     async session({ session, token }: { session: Session; token: JWT }) {
-      // Transfer token properties to session
       if (token) {
         session.jwt = token.jwt as string
         session.userType = token.userType as string
-        
-        // Also add to session.user for easier access
         session.user = {
           ...session.user,
-          userType: token.userType as string
+          userType: token.userType as string,
         }
       }
       return session

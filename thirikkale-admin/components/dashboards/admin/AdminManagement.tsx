@@ -1,106 +1,106 @@
 import React, { useState } from 'react'
 
-interface Driver {
+interface Admin {
   id: string
   name: string
   city: string
   email: string
   gender: string
-  vehicleType: string
+  adminRole: string
   workExperience: string
   status: 'Hire Overdue' | 'Active' | 'Pending' | 'Deactivated' | 'Online' | 'Offline'
   createdTime: string
   avatar: string
 }
 
-const sampleDrivers: Driver[] = [
+const sampleAdmins: Admin[] = [
   {
-    id: 'D50',
-    name: 'Kasun Rajapaksa',
-    city: 'Colombo',
-    email: 'kasun@gmail.com',
+    id: 'A50',
+    name: 'Anjana Nadeeshan',
+    city: 'Denwala',
+    email: 'anjana@gmail.com',
     gender: 'Male',
-    vehicleType: 'Car',
-    workExperience: '5 Years',
-    status: 'Online',
+    adminRole: 'System Admin',
+    workExperience: '4 Years',
+    status: 'Hire Overdue',
     createdTime: '2025-04-26 10:01:41',
-    avatar: '🚗'
+    avatar: '👨‍�'
   },
   {
-    id: 'D51',
-    name: 'Thilaka Perera',
+    id: 'A51',
+    name: 'Nadeeshan Upasena',
+    city: 'Embilipitiya',
+    email: 'nadeeshan@gmail.com',
+    gender: 'Male',
+    adminRole: 'Content Admin',
+    workExperience: '5 Years',
+    status: 'Active',
+    createdTime: '2025-04-26 10:01:41',
+    avatar: '👨‍💻'
+  },
+  {
+    id: 'A52',
+    name: 'Priya Fernando',
     city: 'Kandy',
-    email: 'thilaka@gmail.com',
+    email: 'priya@gmail.com',
     gender: 'Female',
-    vehicleType: 'Van',
+    adminRole: 'User Admin',
     workExperience: '3 Years',
     status: 'Active',
-    createdTime: '2025-04-26 10:01:41',
-    avatar: '🚐'
-  },
-  {
-    id: 'D52',
-    name: 'Mahinda Silva',
-    city: 'Galle',
-    email: 'mahinda@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Motorcycle',
-    workExperience: '7 Years',
-    status: 'Online',
     createdTime: '2025-04-25 14:30:15',
-    avatar: '🏍️'
+    avatar: '👩‍💼'
   },
   {
-    id: 'D53',
-    name: 'Chaminda Fernando',
-    city: 'Matara',
-    email: 'chaminda@gmail.com',
+    id: 'A53',
+    name: 'Kamal Silva',
+    city: 'Galle',
+    email: 'kamal@gmail.com',
     gender: 'Male',
-    vehicleType: 'Tuk Tuk',
-    workExperience: '4 Years',
+    adminRole: 'Security Admin',
+    workExperience: '6 Years',
     status: 'Pending',
     createdTime: '2025-04-24 09:15:30',
-    avatar: '🛺'
+    avatar: '�'
   },
   {
-    id: 'D54',
-    name: 'Sanduni Wickramasinghe',
-    city: 'Negombo',
-    email: 'sanduni@gmail.com',
+    id: 'A54',
+    name: 'Sujani Perera',
+    city: 'Colombo',
+    email: 'sujani@gmail.com',
     gender: 'Female',
-    vehicleType: 'Car',
+    adminRole: 'Database Admin',
     workExperience: '2 Years',
-    status: 'Offline',
+    status: 'Online',
     createdTime: '2025-04-23 16:45:20',
-    avatar: '🚗'
+    avatar: '�'
   },
   {
-    id: 'D55',
-    name: 'Roshan Jayawardena',
-    city: 'Jaffna',
-    email: 'roshan@gmail.com',
+    id: 'A55',
+    name: 'Ruwan Jayasinghe',
+    city: 'Matara',
+    email: 'ruwan@gmail.com',
     gender: 'Male',
-    vehicleType: 'Van',
-    workExperience: '6 Years',
-    status: 'Active',
+    adminRole: 'Network Admin',
+    workExperience: '7 Years',
+    status: 'Offline',
     createdTime: '2025-04-22 11:20:10',
-    avatar: '🚐'
+    avatar: '🌐'
   },
   {
-    id: 'D56',
-    name: 'Nimali Rathnayake',
-    city: 'Kurunegala',
-    email: 'nimali@gmail.com',
+    id: 'A56',
+    name: 'Chamila Rathnayake',
+    city: 'Jaffna',
+    email: 'chamila@gmail.com',
     gender: 'Female',
-    vehicleType: 'Motorcycle',
+    adminRole: 'Support Admin',
     workExperience: '3 Years',
     status: 'Deactivated',
     createdTime: '2025-04-21 08:30:25',
-    avatar: '🏍️'
+    avatar: '🎧'
   }
 ]
 
-export default function DriverManagement() {
+export default function AdminManagement() {
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -111,12 +111,12 @@ export default function DriverManagement() {
   })
 
   const tabs = [
-    { name: 'All', count: 89 },
-    { name: 'Pending Requests', count: 15 },
-    { name: 'Activated Accounts', count: 52 },
-    { name: 'Deactivated Accounts', count: 5 },
-    { name: 'Online Accounts', count: 28 },
-    { name: 'Offline Accounts', count: 24 },
+    { name: 'All', count: 24 },
+    { name: 'Pending Requests', count: 7 },
+    { name: 'Activated Accounts', count: 8 },
+    { name: 'Deactivated Accounts', count: 3 },
+    { name: 'Online Accounts', count: 2 },
+    { name: 'Offline Accounts', count: 10 },
   ]
 
   const getStatusColor = (status: string) => {
@@ -149,8 +149,8 @@ export default function DriverManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Driver Management</h1>
-          <p className="text-gray-600 mt-1">Manage driver accounts, verification, and performance</p>
+          <h1 className="text-2xl font-bold text-gray-900">Admin Management</h1>
+          <p className="text-gray-600 mt-1">Manage administrator accounts and permissions</p>
         </div>
       </div>
 
@@ -181,11 +181,11 @@ export default function DriverManagement() {
         {/* Search Filters */}
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {/* Driver City Filter */}
+            {/* Admin City Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver City"
+                placeholder="Admin City"
                 value={searchFilters.city}
                 onChange={(e) => handleFilterChange('city', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -195,11 +195,11 @@ export default function DriverManagement() {
               </svg>
             </div>
 
-            {/* Driver ID Filter */}
+            {/* Admin ID Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver ID"
+                placeholder="Admin ID"
                 value={searchFilters.id}
                 onChange={(e) => handleFilterChange('id', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -209,11 +209,11 @@ export default function DriverManagement() {
               </svg>
             </div>
 
-            {/* Driver Name Filter */}
+            {/* Admin Name Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver Name"
+                placeholder="Admin Name"
                 value={searchFilters.name}
                 onChange={(e) => handleFilterChange('name', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -256,66 +256,66 @@ export default function DriverManagement() {
           {/* Table Header */}
           <div className="bg-gray-100 border-b-2 border-gray-300">
             <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Info</div>
+              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Admin Info</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Email Address</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Gender</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Type</div>
+              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Admin Role</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Experience</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
             </div>
           </div>
 
-          {/* Driver Rows */}
-          {sampleDrivers.map((driver, index) => (
-            <div key={driver.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+          {/* Admin Rows */}
+          {sampleAdmins.map((admin, index) => (
+            <div key={admin.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
               <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-                {/* Driver Info Column */}
+                {/* Admin Info Column */}
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
                     <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm border border-gray-300">
-                      {driver.avatar}
+                      {admin.avatar}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="mb-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{driver.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{admin.name}</p>
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{driver.city}</p>
+                    <p className="text-xs text-gray-500 truncate">{admin.city}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-xs text-gray-400">ID:</span>
                       <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                        {driver.id}
+                        {admin.id}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 truncate">{driver.createdTime}</p>
+                    <p className="text-xs text-gray-400 truncate">{admin.createdTime}</p>
                   </div>
                 </div>
 
                 {/* Email Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.email}>
-                  {driver.email}
+                <div className="text-sm text-gray-700 truncate text-center" title={admin.email}>
+                  {admin.email}
                 </div>
 
                 {/* Gender Column */}
                 <div className="text-sm text-gray-700 text-center">
-                  {driver.gender}
+                  {admin.gender}
                 </div>
 
-                {/* Vehicle Type Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.vehicleType}>
-                  {driver.vehicleType}
+                {/* Admin Role Column */}
+                <div className="text-sm text-gray-700 truncate text-center" title={admin.adminRole}>
+                  {admin.adminRole}
                 </div>
 
                 {/* Experience Column */}
                 <div className="text-sm text-gray-700 text-center">
-                  {driver.workExperience}
+                  {admin.workExperience}
                 </div>
 
                 {/* Status Column */}
                 <div className="text-center">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(driver.status)}`}>
-                    {driver.status}
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(admin.status)}`}>
+                    {admin.status}
                   </span>
                 </div>
 

@@ -19,10 +19,10 @@ declare module "next-auth" {
    */
   interface Session {
     jwt?: string
+    userType?: string
     user?: {
-      [key: string]: any
-    }
-    userType: String & DefaultSession["user"]
+      userType?: string
+    } & DefaultSession["user"]
   }
 }
  
@@ -30,6 +30,6 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     jwt?: string
-    [key: string]: any
+    userType?: string
   }
 }

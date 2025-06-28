@@ -15,7 +15,7 @@ export default function LoginPage() {
             src="/ThirikkaleMain.svg"
             alt="App Logo"
             width={150}
-            height={0}
+            height={70}
             style={{ width: 150, height: "auto", marginRight: 8 }}
             priority
             className="self-center ml-2"
