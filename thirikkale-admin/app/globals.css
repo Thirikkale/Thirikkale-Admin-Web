@@ -45,7 +45,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(95.815% 0.00011 271.152);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -118,5 +118,91 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+/* Smooth animations for sidebar dropdown */
+@layer components {
+  /* Collapsible content animation - ultra smooth */
+  [data-state="open"] {
+    animation: slideDown 180ms ease-out;
+  }
+  
+  [data-state="closed"] {
+    animation: slideUp 180ms ease-out;
+  }
+
+  /* Chevron rotation animation - instant response */
+  .sidebar-chevron {
+    transition: transform 120ms ease-out;
+    will-change: transform;
+  }
+
+  .sidebar-chevron-open {
+    transform: rotate(180deg);
+  }
+
+  /* Hover effects - minimal and fast */
+  .sidebar-item {
+    transition: transform 80ms ease-out, background-color 80ms ease-out;
+  }
+
+  .sidebar-item:hover:not(.sidebar-item-active) {
+    transform: translateX(1px);
+  }
+
+  /* Active tab hover behavior - keep blue but slightly darker */
+  .sidebar-item.sidebar-item-active:hover {
+    background-color: rgb(29 78 216) !important; /* Darker blue on hover */
+    transform: translateX(0px);
+  }
+
+  /* Non-active tab hover - light gray */
+  .sidebar-item:hover:not(.sidebar-item-active) {
+    background-color: rgba(40, 44, 255, 0.205) !important; /* Light gray */
+  }
+
+  /* Dropdown content - simple overflow control */
+  .sidebar-dropdown-content {
+    overflow: hidden;
+  }
+
+  /* Simplified dropdown items - no complex transforms */
+  .sidebar-dropdown-item {
+    opacity: 0;
+    transition: opacity 120ms ease-out;
+  }
+
+  .sidebar-dropdown-open .sidebar-dropdown-item {
+    opacity: 1;
+  }
+
+  /* Minimal staggered delays for smoothness */
+  .sidebar-dropdown-item:nth-child(1) { transition-delay: 0ms; }
+  .sidebar-dropdown-item:nth-child(2) { transition-delay: 15ms; }
+  .sidebar-dropdown-item:nth-child(3) { transition-delay: 30ms; }
+  .sidebar-dropdown-item:nth-child(4) { transition-delay: 45ms; }
+  .sidebar-dropdown-item:nth-child(5) { transition-delay: 60ms; }
+}
+
+@keyframes slideDown {
+  0% {
+    height: 0;
+    opacity: 0.8;
+  }
+  100% {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  0% {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  100% {
+    height: 0;
+    opacity: 0.8;
   }
 }

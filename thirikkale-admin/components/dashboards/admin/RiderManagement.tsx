@@ -1,106 +1,106 @@
 import React, { useState } from 'react'
 
-interface Driver {
+interface Rider {
   id: string
   name: string
   city: string
   email: string
   gender: string
-  vehicleType: string
+  riderType: string
   workExperience: string
   status: 'Hire Overdue' | 'Active' | 'Pending' | 'Deactivated' | 'Online' | 'Offline'
   createdTime: string
   avatar: string
 }
 
-const sampleDrivers: Driver[] = [
+const sampleRiders: Rider[] = [
   {
-    id: 'D50',
-    name: 'Kasun Rajapaksa',
+    id: 'R50',
+    name: 'Saman Perera',
     city: 'Colombo',
-    email: 'kasun@gmail.com',
+    email: 'saman@gmail.com',
     gender: 'Male',
-    vehicleType: 'Car',
-    workExperience: '5 Years',
-    status: 'Online',
+    riderType: 'Regular Rider',
+    workExperience: '2 Years',
+    status: 'Active',
     createdTime: '2025-04-26 10:01:41',
     avatar: '🚗'
   },
   {
-    id: 'D51',
-    name: 'Thilaka Perera',
+    id: 'R51',
+    name: 'Nimal Silva',
     city: 'Kandy',
-    email: 'thilaka@gmail.com',
-    gender: 'Female',
-    vehicleType: 'Van',
+    email: 'nimal@gmail.com',
+    gender: 'Male',
+    riderType: 'Premium Rider',
     workExperience: '3 Years',
-    status: 'Active',
-    createdTime: '2025-04-26 10:01:41',
-    avatar: '🚐'
-  },
-  {
-    id: 'D52',
-    name: 'Mahinda Silva',
-    city: 'Galle',
-    email: 'mahinda@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Motorcycle',
-    workExperience: '7 Years',
     status: 'Online',
-    createdTime: '2025-04-25 14:30:15',
-    avatar: '🏍️'
+    createdTime: '2025-04-26 10:01:41',
+    avatar: '🚕'
   },
   {
-    id: 'D53',
-    name: 'Chaminda Fernando',
+    id: 'R52',
+    name: 'Kamala Fernando',
+    city: 'Galle',
+    email: 'kamala@gmail.com',
+    gender: 'Female',
+    riderType: 'Business Rider',
+    workExperience: '1 Year',
+    status: 'Active',
+    createdTime: '2025-04-25 14:30:15',
+    avatar: '🚙'
+  },
+  {
+    id: 'R53',
+    name: 'Ruwan Jayasinghe',
     city: 'Matara',
-    email: 'chaminda@gmail.com',
+    email: 'ruwan@gmail.com',
     gender: 'Male',
-    vehicleType: 'Tuk Tuk',
+    riderType: 'Regular Rider',
     workExperience: '4 Years',
     status: 'Pending',
     createdTime: '2025-04-24 09:15:30',
-    avatar: '🛺'
-  },
-  {
-    id: 'D54',
-    name: 'Sanduni Wickramasinghe',
-    city: 'Negombo',
-    email: 'sanduni@gmail.com',
-    gender: 'Female',
-    vehicleType: 'Car',
-    workExperience: '2 Years',
-    status: 'Offline',
-    createdTime: '2025-04-23 16:45:20',
     avatar: '🚗'
   },
   {
-    id: 'D55',
-    name: 'Roshan Jayawardena',
+    id: 'R54',
+    name: 'Sunitha Rathnayake',
+    city: 'Negombo',
+    email: 'sunitha@gmail.com',
+    gender: 'Female',
+    riderType: 'Premium Rider',
+    workExperience: '5 Years',
+    status: 'Offline',
+    createdTime: '2025-04-23 16:45:20',
+    avatar: '🚕'
+  },
+  {
+    id: 'R55',
+    name: 'Anil Wickramasinghe',
     city: 'Jaffna',
-    email: 'roshan@gmail.com',
+    email: 'anil@gmail.com',
     gender: 'Male',
-    vehicleType: 'Van',
+    riderType: 'Business Rider',
     workExperience: '6 Years',
     status: 'Active',
     createdTime: '2025-04-22 11:20:10',
-    avatar: '🚐'
+    avatar: '🚙'
   },
   {
-    id: 'D56',
-    name: 'Nimali Rathnayake',
+    id: 'R56',
+    name: 'Malika Perera',
     city: 'Kurunegala',
-    email: 'nimali@gmail.com',
+    email: 'malika@gmail.com',
     gender: 'Female',
-    vehicleType: 'Motorcycle',
-    workExperience: '3 Years',
+    riderType: 'Regular Rider',
+    workExperience: '2 Years',
     status: 'Deactivated',
     createdTime: '2025-04-21 08:30:25',
-    avatar: '🏍️'
+    avatar: '🚗'
   }
 ]
 
-export default function DriverManagement() {
+export default function RiderManagement() {
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -111,12 +111,12 @@ export default function DriverManagement() {
   })
 
   const tabs = [
-    { name: 'All', count: 89 },
-    { name: 'Pending Requests', count: 15 },
-    { name: 'Activated Accounts', count: 52 },
-    { name: 'Deactivated Accounts', count: 5 },
-    { name: 'Online Accounts', count: 28 },
-    { name: 'Offline Accounts', count: 24 },
+    { name: 'All', count: 156 },
+    { name: 'Pending Requests', count: 12 },
+    { name: 'Activated Accounts', count: 98 },
+    { name: 'Deactivated Accounts', count: 8 },
+    { name: 'Online Accounts', count: 45 },
+    { name: 'Offline Accounts', count: 53 },
   ]
 
   const getStatusColor = (status: string) => {
@@ -149,8 +149,8 @@ export default function DriverManagement() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Driver Management</h1>
-          <p className="text-gray-600 mt-1">Manage driver accounts, verification, and performance</p>
+          <h1 className="text-2xl font-bold text-gray-900">Rider Management</h1>
+          <p className="text-gray-600 mt-1">Manage rider accounts, verification, and support</p>
         </div>
       </div>
 
@@ -181,11 +181,11 @@ export default function DriverManagement() {
         {/* Search Filters */}
         <div className="p-6 border-b border-gray-200">
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {/* Driver City Filter */}
+            {/* Rider City Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver City"
+                placeholder="Rider City"
                 value={searchFilters.city}
                 onChange={(e) => handleFilterChange('city', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -195,11 +195,11 @@ export default function DriverManagement() {
               </svg>
             </div>
 
-            {/* Driver ID Filter */}
+            {/* Rider ID Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver ID"
+                placeholder="Rider ID"
                 value={searchFilters.id}
                 onChange={(e) => handleFilterChange('id', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -209,11 +209,11 @@ export default function DriverManagement() {
               </svg>
             </div>
 
-            {/* Driver Name Filter */}
+            {/* Rider Name Filter */}
             <div className="relative">
               <input
                 type="text"
-                placeholder="Driver Name"
+                placeholder="Rider Name"
                 value={searchFilters.name}
                 onChange={(e) => handleFilterChange('name', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -256,66 +256,66 @@ export default function DriverManagement() {
           {/* Table Header */}
           <div className="bg-gray-100 border-b-2 border-gray-300">
             <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Info</div>
+              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rider Info</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Email Address</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Gender</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Type</div>
+              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rider Type</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Experience</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
               <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
             </div>
           </div>
 
-          {/* Driver Rows */}
-          {sampleDrivers.map((driver, index) => (
-            <div key={driver.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+          {/* Rider Rows */}
+          {sampleRiders.map((rider, index) => (
+            <div key={rider.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
               <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-                {/* Driver Info Column */}
+                {/* Rider Info Column */}
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
                     <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm border border-gray-300">
-                      {driver.avatar}
+                      {rider.avatar}
                     </div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="mb-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{driver.name}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{rider.name}</p>
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{driver.city}</p>
+                    <p className="text-xs text-gray-500 truncate">{rider.city}</p>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-xs text-gray-400">ID:</span>
                       <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                        {driver.id}
+                        {rider.id}
                       </span>
                     </div>
-                    <p className="text-xs text-gray-400 truncate">{driver.createdTime}</p>
+                    <p className="text-xs text-gray-400 truncate">{rider.createdTime}</p>
                   </div>
                 </div>
 
                 {/* Email Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.email}>
-                  {driver.email}
+                <div className="text-sm text-gray-700 truncate text-center" title={rider.email}>
+                  {rider.email}
                 </div>
 
                 {/* Gender Column */}
                 <div className="text-sm text-gray-700 text-center">
-                  {driver.gender}
+                  {rider.gender}
                 </div>
 
-                {/* Vehicle Type Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.vehicleType}>
-                  {driver.vehicleType}
+                {/* Rider Type Column */}
+                <div className="text-sm text-gray-700 truncate text-center" title={rider.riderType}>
+                  {rider.riderType}
                 </div>
 
                 {/* Experience Column */}
                 <div className="text-sm text-gray-700 text-center">
-                  {driver.workExperience}
+                  {rider.workExperience}
                 </div>
 
                 {/* Status Column */}
                 <div className="text-center">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(driver.status)}`}>
-                    {driver.status}
+                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(rider.status)}`}>
+                    {rider.status}
                   </span>
                 </div>
 
