@@ -8,14 +8,13 @@ import {
 import { Loader } from "@/components/ui/loader"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LoadingProvider } from "@/components/providers/LoaderProvider"
+import { PageHeaderProvider } from "@/components/providers/PageHeaderProvider"
 import { useSearchParams } from "next/navigation"
 import { Home, Users, Settings2, MapPinned, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
 import Dash from "@/components/dashboards/Dash"
-import { TopNavBar } from "@/components/TopNavBar"
-
 // Admin components
 import Analytics from "@/components/dashboards/admin/Analytics"
 import DriverManagement from "@/components/dashboards/admin/DriverManagement"
@@ -45,24 +44,28 @@ export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  // State for page header management
+  const [pageHeader, setPageHeader] = useState<{
+    title: string
+    subtitle?: string
+  }>({ title: "", subtitle: "" })
+
   // Get userType from session
   const userType = session?.user?.userType
   const tab = searchParams.get("tab") || "dashboard"
 
-  // Map userType to available tabs - matches the sidebar configuration
+  // Map userType to available tabs
   const tabConfig = {
     Admin: [
-      { title: "Dashboard Overview", url: "dashboard", icon: Home },
+      { title: "Dashboard", url: "dashboard", icon: Home },
       { title: "Admin Management", url: "dashboard?tab=admin-management", icon: UserCog },
       { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
       { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
-      { title: "Company Revenue", url: "dashboard?tab=company-revenue", icon: HandCoins },
+      { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
       { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
       { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Settings },
       { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
-      { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins }
     ],
-
     RiderSupport: [
       { title: "Dashboard", url: "dashboard", icon: Home },
       { title: "Rider Verification", url: "dashboard?tab=rider-verification", icon: UserRoundCheck },
@@ -71,7 +74,6 @@ export default function Page() {
       { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
       { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
     ],
-
     DriverSupport: [
       { title: "Dashboard", url: "dashboard", icon: Home },
       { title: "Document Verification", url: "dashboard?tab=document-verification", icon: UserRoundCheck },
@@ -80,7 +82,7 @@ export default function Page() {
       { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
       { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
     ],
-  }
+  } as const
 
   const tabs = userType ? tabConfig[userType as keyof typeof tabConfig] : []
 
@@ -118,6 +120,16 @@ export default function Page() {
     }
   }, [tab, tabs, router, userType])
 
+  // FOURTH useEffect: Update page header based on current tab
+  useEffect(() => {
+    if (currentTab && currentTab.title) {
+      setPageHeader({
+        title: currentTab.title,
+        subtitle: `Manage and monitor ${currentTab.title.toLowerCase()} activities`
+      })
+    }
+  }, [currentTab?.title]) // Only depend on the title, not the entire currentTab object
+
   // NOW we can have conditional returns AFTER all hooks
   if (status === "loading") {
     return (
@@ -135,81 +147,76 @@ export default function Page() {
     )
   }
 
-  // Render different components based on tab parameter and userType
+  // Render different components based on currentTab.title and userType
   const renderTabComponent = () => {
     if (!currentTab) return <Dash />
 
-    const tabTitle = currentTab.title
-
-    // Handle Dashboard tabs
-    if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {
-      return <Dash />
+    switch (currentTab.title) {
+      case "Dashboard":
+        return <Dash />
+      
+      // Admin-only components
+      case "Admin Management":
+        return userType === "Admin" ? <AdminManagement /> : <Dash />
+      case "Rider Management":
+        return userType === "Admin" ? <RiderManagement /> : <Dash />
+      case "Driver Management":
+        return userType === "Admin" ? <DriverManagement /> : <Dash />
+      case "Finance Management":
+        return userType === "Admin" ? <FinanceManagement /> : <Dash />
+      case "Reports & Analytics":
+        return userType === "Admin" ? <Analytics /> : <Dash />
+      case "Pricing & Policy Manage":
+        return userType === "Admin" ? <Pricing /> : <Dash />
+      case "System Settings":
+        return userType === "Admin" ? <SystemSettings /> : <Dash />
+      
+      // Rider Support components
+      case "Rider Verification":
+        return userType === "RiderSupport" ? <RiderVerification /> : <Dash />
+      case "Ratings & Reviews":
+        return userType === "RiderSupport" ? <RiderRatingsAndReviews /> : <Dash />
+      
+      // Driver Support components
+      case "Document Verification":
+        return userType === "DriverSupport" ? <DriverDocumentVerification /> : <Dash />
+      case "Driver Performance":
+        return userType === "DriverSupport" ? <DriverPerformance /> : <Dash />
+      
+      // Shared components that need user-type specific handling
+      case "Support Tickets":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderSupportTickets />
+          case "DriverSupport":
+            return <DiverSupportTicket />
+          default:
+            return <Dash />
+        }
+      
+      case "Account Management":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderAccountManagement />
+          case "DriverSupport":
+            return <DriverAccountManagement />
+          default:
+            return <Dash />
+        }
+      
+      case "Activity Feed":
+        switch (userType) {
+          case "RiderSupport":
+            return <RiderActivityFeed />
+          case "DriverSupport":
+            return <DriverActivityFeed />
+          default:
+            return <Dash />
+        }
+      
+      default:
+        return <Dash />
     }
-
-    // Handle Admin-only components
-    if (userType === "Admin") {
-      if (tabTitle === "Admin Management" || tabTitle === "Admin Management") {
-        return <AdminManagement />
-      }
-      if (tabTitle === "Rider Management") {
-        return <RiderManagement /> // Using UserManagement for now, can be changed to specific component
-      }
-      if (tabTitle === "Driver Management") {
-        return <DriverManagement />
-      }
-      if (tabTitle === "Finance Management" || tabTitle === "Finance Management") {
-        return <FinanceManagement />
-      }
-      if (tabTitle === "Reports & Analytics" || tabTitle === "Analytics") {
-        return <Analytics />
-      }
-      if (tabTitle === "Pricing & Policy Manage") {
-        return <Pricing />
-      }
-      if (tabTitle === "System Settings") {
-        return <SystemSettings />
-      }
-    }
-
-    // Handle RiderSupport components
-    if (userType === "RiderSupport") {
-      if (tabTitle === "Rider Verification") {
-        return <RiderVerification />
-      }
-      if (tabTitle === "Ratings & Reviews") {
-        return <RiderRatingsAndReviews />
-      }
-      if (tabTitle === "Support Tickets") {
-        return <RiderSupportTickets />
-      }
-      if (tabTitle === "Account Management") {
-        return <RiderAccountManagement />
-      }
-      if (tabTitle === "Activity Feed") {
-        return <RiderActivityFeed />
-      }
-    }
-
-    // Handle DriverSupport components
-    if (userType === "DriverSupport") {
-      if (tabTitle === "Document Verification") {
-        return <DriverDocumentVerification />
-      }
-      if (tabTitle === "Driver Performance") {
-        return <DriverPerformance />
-      }
-      if (tabTitle === "Support Tickets") {
-        return <DiverSupportTicket />
-      }
-      if (tabTitle === "Account Management") {
-        return <DriverAccountManagement />
-      }
-      if (tabTitle === "Activity Feed") {
-        return <DriverActivityFeed />
-      }
-    }
-
-    return <Dash />
   }
 
   return (
@@ -217,11 +224,21 @@ export default function Page() {
       <SidebarProvider>
         <AppSidebar userType={userType as "Admin" | "RiderSupport" | "DriverSupport"} />
         <SidebarInset>
-          <TopNavBar
-            subtitle="Welcome back! Here's what's happening today."
-          />
-          <div className="flex flex-1 flex-col gap-4 p-6 pt-6">
-            {renderTabComponent()}
+          <header className="flex h-20 z-2 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-18">
+            <SidebarTrigger className="-ml-1 -mt-6" />
+            <div className="flex flex-col flex-1 mt-4 pt-2 pl-2">
+              <h1 className="text-2xl font-bold text-gray-900">
+                {pageHeader.title || currentTab?.title || "Dashboard"}
+              </h1>
+              {pageHeader.subtitle && (
+                <p className="text-sm text-gray-600 mt-1 pb-4 mb-4">{pageHeader.subtitle}</p>
+              )}
+            </div>
+          </header>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <PageHeaderProvider setPageHeader={setPageHeader}>
+              {renderTabComponent()}
+            </PageHeaderProvider>
           </div>
         </SidebarInset>
       </SidebarProvider>

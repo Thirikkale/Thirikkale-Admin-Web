@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
 interface Transaction {
   id: string
@@ -96,6 +97,7 @@ const sampleTransactions: Transaction[] = [
 ]
 
 export default function FinanceManagement() {
+  const { setPageHeader } = usePageHeader()
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     transactionId: '',
@@ -104,6 +106,13 @@ export default function FinanceManagement() {
     dateFrom: '',
     dateTo: ''
   })
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Finance Management",
+      subtitle: "Monitor transactions, payments, withdrawals, and financial analytics"
+    })
+  }, [setPageHeader])
 
   const tabs = [
     { name: 'All', count: 1247 },
@@ -156,14 +165,6 @@ export default function FinanceManagement() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Finance Management</h1>
-          <p className="text-gray-600 mt-1">Manage payments, earnings, and financial reports</p>
-        </div>
-      </div>
-
       {/* Financial Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white border border-gray-200 shadow-sm rounded-lg p-6">

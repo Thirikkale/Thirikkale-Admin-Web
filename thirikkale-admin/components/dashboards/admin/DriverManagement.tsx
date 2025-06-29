@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
 interface Driver {
   id: string
@@ -101,6 +102,7 @@ const sampleDrivers: Driver[] = [
 ]
 
 export default function DriverManagement() {
+  const { setPageHeader } = usePageHeader()
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -109,6 +111,13 @@ export default function DriverManagement() {
     dateFrom: '',
     dateTo: ''
   })
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Driver Management",
+      subtitle: "Manage driver accounts, vehicle verification, and performance monitoring"
+    })
+  }, [setPageHeader])
 
   const tabs = [
     { name: 'All', count: 89 },
@@ -146,14 +155,6 @@ export default function DriverManagement() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Driver Management</h1>
-          <p className="text-gray-600 mt-1">Manage driver accounts, verification, and performance</p>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
         {/* Status Tabs */}

@@ -41,12 +41,8 @@ export default function Overview({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-6">
       {/* Header with time period selector */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-600 mt-1">Monitor your platform's key metrics and performance</p>
-        </div>
-        <div className="flex gap-2">
+      <div className="flex justify-end -mt-14 ">
+        <div className="flex gap-2 z-2">
           {periods.map((period) => (
             <Button
               key={period}

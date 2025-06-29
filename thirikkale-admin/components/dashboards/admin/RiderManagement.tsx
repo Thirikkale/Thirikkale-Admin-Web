@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
 interface Rider {
   id: string
@@ -101,6 +102,7 @@ const sampleRiders: Rider[] = [
 ]
 
 export default function RiderManagement() {
+  const { setPageHeader } = usePageHeader()
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -109,6 +111,13 @@ export default function RiderManagement() {
     dateFrom: '',
     dateTo: ''
   })
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Rider Management",
+      subtitle: "Manage rider accounts, subscription tiers, and customer support"
+    })
+  }, [setPageHeader])
 
   const tabs = [
     { name: 'All', count: 156 },
@@ -146,14 +155,6 @@ export default function RiderManagement() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Rider Management</h1>
-          <p className="text-gray-600 mt-1">Manage rider accounts, verification, and support</p>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
         {/* Status Tabs */}

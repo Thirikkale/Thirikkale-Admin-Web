@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
 interface Admin {
   id: string
@@ -101,6 +102,7 @@ const sampleAdmins: Admin[] = [
 ]
 
 export default function AdminManagement() {
+  const { setPageHeader } = usePageHeader()
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -109,6 +111,13 @@ export default function AdminManagement() {
     dateFrom: '',
     dateTo: ''
   })
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Admin Management",
+      subtitle: "Manage administrator accounts, roles, and permissions across the platform"
+    })
+  }, [setPageHeader])
 
   const tabs = [
     { name: 'All', count: 24 },
@@ -146,14 +155,6 @@ export default function AdminManagement() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Admin Management</h1>
-          <p className="text-gray-600 mt-1">Manage administrator accounts and permissions</p>
-        </div>
-      </div>
-
       {/* Content */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
         {/* Status Tabs */}
