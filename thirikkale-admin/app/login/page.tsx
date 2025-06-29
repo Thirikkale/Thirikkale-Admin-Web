@@ -16,8 +16,15 @@ export default function LoginPage() {
             alt="App Logo"
             width={150}
             height={70}
-            style={{ width: 150, height: "auto", marginRight: 8 }}
+            style={{ 
+              width: 140, 
+              height: "auto", 
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center", 
+            }}
             priority
+            unoptimized
             className="self-center ml-2"
           />
         </a>

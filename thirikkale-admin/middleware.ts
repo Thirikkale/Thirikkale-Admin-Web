@@ -10,7 +10,9 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/auth') ||
     pathname === '/login' ||
-    pathname === '/reset-password'
+    pathname === '/reset-password' ||
+    pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/) ||
+    pathname.startsWith('/favicon')
   ) {
     return NextResponse.next()
   }
@@ -33,5 +35,16 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   // Specify which paths to run middleware on
-  matcher: ['/((?!api/auth|_next/static|_next/image|favicon.ico|login|reset-password).*)'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - login, reset-password (auth pages)
+     * - files with common image extensions
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|login|reset-password).*)',
+  ],
 }
