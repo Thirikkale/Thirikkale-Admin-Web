@@ -5,7 +5,7 @@ import { DefaultSession } from "next-auth"
 import { ZodError } from "zod"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "@/lib/zod" // Zod schema to validate login form
-import { saltAndHashPassword } from "@/utils/password" // Optional: to hash passwords
+// import { saltAndHashPassword } from "@/utils/password" // Optional: to hash passwords
 import type { Session, User } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 
@@ -33,14 +33,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               userType: "Admin",
             },
             {
-              email: "rider@gmail.com",
+              email: "userhandler@gmail.com",
               password: "123",
-              userType: "RiderSupport",
+              userType: "UserHandler",
             },
             {
-              email: "driver@gmail.com",
+              email: "tripsupport@gmail.com",
               password: "123",
-              userType: "DriverSupport",
+              userType: "TripSupport",
+            },
+            {
+              email: "marketing@gmail.com",
+              password: "123",
+              userType: "MarketingHandler",
+            },
+            {
+              email: "finance@gmail.com",
+              password: "123",
+              userType: "FinanceHandler",
             },
           ]
 
@@ -55,7 +65,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           }
 
           // ✅ Optional: simulate hashing (not used in mock check)
-          const hashedPassword = await saltAndHashPassword(foundUser.password)
+          // const hashedPassword = await saltAndHashPassword(foundUser.password)
 
           const userDetails = {
             id: foundUser.email, // NextAuth requires an id field
@@ -85,8 +95,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     // ✅ Called when JWT is created/updated
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
-        token.jwt = (user as any).jwt
-        token.userType = (user as any).userType
+        token.jwt = (user as User & { jwt?: string }).jwt
+        token.userType = (user as User & { userType?: string }).userType
       }
       return token
     },

@@ -2,22 +2,23 @@
 
 import * as React from "react"
 import Image from "next/image"
+import Link from "next/link"
 import {
+  Users,
+  Shield,
   Home,
   Car,
-  MapPinned,
   HandCoins,
-  ChartColumn,
+  ChartColumnBig,
   Settings,
   UserRoundCheck,
   Star,
   Headset,
   UserCog,
   Activity,
-  Users,
-  Settings2,
   ChevronDown,
-  ChevronRight,
+  PieChart,
+  CarFront,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -40,7 +41,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 
-type UserType = "Admin" | "RiderSupport" | "DriverSupport"
+type UserType = "Admin" | "UserHandler" | "TripSupport" | "MarketingHandler" | "FinanceHandler"
 
 type SidebarItem = {
   title: string
@@ -51,7 +52,7 @@ type SidebarItem = {
 
 const sidebarConfig: Record<UserType, SidebarItem[]> = {
   Admin: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
     {
       title: "User Management",
       icon: Users,
@@ -62,25 +63,37 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
       ],
     },
     { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
-    { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Settings },
-    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
+    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumnBig },
+    { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Shield },
     { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
   ],
-  RiderSupport: [
+  UserHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
-    { title: "Rider Verification", url: "dashboard?tab=rider-verification", icon: UserRoundCheck },
-    { title: "Ratings & Reviews", url: "dashboard?tab=ratings-reviews", icon: Star },
-    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-    { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
+    { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
+    { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
+    { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
+    { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
+    { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Shield },
+    { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: PieChart },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
-  DriverSupport: [
+  TripSupport: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
-    { title: "Document Verification", url: "dashboard?tab=document-verification", icon: UserRoundCheck },
-    { title: "Driver Performance", url: "dashboard?tab=driver-performance", icon: Star },
+    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Car },
     { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-    { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
+    { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+  ],
+  MarketingHandler: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumnBig },
+    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+  ],
+  FinanceHandler: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
+    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
+    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumnBig },
   ],
 }
 
@@ -89,7 +102,7 @@ const data = {
   user: {
     name: "shadcn",
     email: "m@example.com",
-    avatar: "", // Empty string will trigger fallback
+    avatar: "/avatars/shadcn.jpg",
   }
 }
 
@@ -97,7 +110,7 @@ export function AppSidebar({
   userType = "Admin",
   ...props
 }: React.ComponentProps<typeof Sidebar> & { userType?: UserType }) {
-  const items = sidebarConfig[userType] || []
+  const items = React.useMemo(() => sidebarConfig[userType] || [], [userType])
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const sidebarContext = useSidebar();
@@ -113,12 +126,6 @@ export function AppSidebar({
     }
   }, [isCollapsed])
 
-  // Get the full path with query string
-  const fullPath = React.useMemo(() => {
-    const params = searchParams.toString()
-    return params ? `${pathname}?${params}` : pathname
-  }, [pathname, searchParams])
-
   // Toggle collapsible item
   const toggleItem = (title: string) => {
     setOpenItems(prev =>
@@ -129,11 +136,26 @@ export function AppSidebar({
   }
 
   // Helper to check if the tab is active
-  const isActive = (url?: string) => {
+  const isActive = React.useCallback((url?: string) => {
     if (!url) return false
-    // For other items, check if the URL ends with this item's URL
-    return fullPath.endsWith(url);
-  }
+
+    // Extract the tab parameter from the URL
+    const urlParts = url.split('?tab=')
+    const tabName = urlParts[1]
+    const currentTab = searchParams.get('tab')
+
+    // If it's the main dashboard without tab parameter
+    if (url === "dashboard" || url === "/dashboard") {
+      return pathname === "/dashboard" && !currentTab
+    }
+
+    // If it's a tab-based URL, check if the current tab matches
+    if (tabName) {
+      return pathname === "/dashboard" && currentTab === tabName
+    }
+
+    return false
+  }, [pathname, searchParams])
 
   // Helper to check if any child is active
   const isChildActive = (children?: SidebarItem[]) => {
@@ -141,9 +163,14 @@ export function AppSidebar({
     return children.some(child => isActive(child.url))
   }
 
-  // Auto-open dropdown if a child item is active
+  // Close dropdowns when clicking on non-dropdown items
+  const handleItemClick = () => {
+    setOpenItems([])
+  }
+
+  // Auto-open dropdown if a child item is active, and close others when navigating away
   React.useEffect(() => {
-    let shouldBeOpen: string[] = []
+    const shouldBeOpen: string[] = []
 
     items.forEach(item => {
       if (item.children) {
@@ -155,11 +182,11 @@ export function AppSidebar({
     })
 
     setOpenItems(shouldBeOpen)
-  }, [searchParams, items])
+  }, [searchParams, items, isActive])
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="pb-0 flex justify-center">
+    <Sidebar collapsible="icon" className="border-r border-gray-200 bg-white" {...props}>
+      <SidebarHeader className="pb-4 pt-6 flex justify-center border-b border-gray-100">
         <div
           style={{
             transition: "opacity 0.3s, width 0.3s",
@@ -170,22 +197,24 @@ export function AppSidebar({
             justifyContent: "center",
             alignItems: "center",
           }}
-          >
+        >
           {!isCollapsed && (
             <Image
               src="/ThirikkaleMain.svg"
               alt="App Logo"
-              width={150}
-              height={60}
-              style={{ width: 150, height: "auto" }}
+              width={140}
+              height={58}
+              style={{ width: 140, height: "auto" }}
               priority
+              unoptimized
             />
           )}
         </div>
+        {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="overflow-hidden px-2">
         <SidebarGroup className="pt-0">
-          <SidebarMenu>
+          <SidebarMenu className="overflow-y-auto overflow-x-hidden space-y-1">
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
                 {item.children ? (
@@ -197,36 +226,37 @@ export function AppSidebar({
                   >
                     <CollapsibleTrigger asChild>
                       <SidebarMenuButton
-                        className={`w-full ${isChildActive(item.children)
-                          ? 'bg-blue-50 text-blue-700'
+                        tooltip={isCollapsed ? item.title : undefined}
+                        size="lg"
+                        className={`w-full h-12 rounded-lg sidebar-item ${isCollapsed ? 'justify-center' : 'px-3 py-2'} ${isChildActive(item.children)
+                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
                           : 'hover:bg-gray-50 text-gray-700'
                           }`}
                       >
-                        <item.icon />
+                        <item.icon className="h-5 w-5 shrink-0" />
                         {!isCollapsed && (
                           <>
-                            <span>{item.title}</span>
-                            <ChevronDown className={`ml-auto h-4 w-4 transition-transform ${openItems.includes(item.title) ? 'rotate-180' : ''}`} />
+                            <span className="truncate font-medium text-sm">{item.title}</span>
+                            <ChevronDown className={`ml-auto h-4 w-4 sidebar-chevron ${openItems.includes(item.title) ? 'sidebar-chevron-open' : ''}`} />
                           </>
                         )}
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
-                    <CollapsibleContent>
-                      <SidebarMenu className="ml-6 mt-1">
+                    <CollapsibleContent className={`sidebar-dropdown-content ${openItems.includes(item.title) ? 'sidebar-dropdown-open' : ''}`}>
+                      <SidebarMenu className="ml-6 mt-1 space-y-1">
                         {item.children.map((child) => (
-                          <SidebarMenuItem key={child.title}>
-                            <SidebarMenuButton asChild>
-                              <a
+                          <SidebarMenuItem key={child.title} className="sidebar-dropdown-item">
+                            <SidebarMenuButton asChild className="w-full">
+                              <Link
                                 href={child.url || "#"}
-                                className={
-                                  isActive(child.url)
-                                    ? "bg-blue-400 text-white"
-                                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                                }
+                                className={`h-10 rounded-lg px-3 py-2 flex items-center gap-3 text-sm font-medium sidebar-item ${isActive(child.url)
+                                  ? "bg-blue-500 text-white shadow-sm"
+                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                  }`}
                               >
-                                <child.icon />
-                                <span>{child.title}</span>
-                              </a>
+                                <child.icon className="h-4 w-4 shrink-0" />
+                                <span className="truncate">{child.title}</span>
+                              </Link>
                             </SidebarMenuButton>
                           </SidebarMenuItem>
                         ))}
@@ -235,18 +265,18 @@ export function AppSidebar({
                   </Collapsible>
                 ) : (
                   // Render regular menu item
-                  <SidebarMenuButton asChild>
-                    <a
+                  <SidebarMenuButton asChild className="w-full" tooltip={isCollapsed ? item.title : undefined} size="lg">
+                    <Link
                       href={item.url || "#"}
-                      className={
-                        isActive(item.url)
-                        ? "bg-blue-400 text-primary"
-                        : undefined
-                      }
+                      onClick={handleItemClick}
+                      className={`h-12 rounded-lg flex items-center text-sm font-medium sidebar-item ${isCollapsed ? 'justify-center px-2' : 'px-3 py-2 gap-3'} ${isActive(item.url)
+                        ? "bg-blue-500 text-white shadow-sm"
+                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                        }`}
                     >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </a>
+                      <item.icon className="h-5 w-5 shrink-0" />
+                      {!isCollapsed && <span className="truncate">{item.title}</span>}
+                    </Link>
                   </SidebarMenuButton>
                 )}
               </SidebarMenuItem>
@@ -254,7 +284,7 @@ export function AppSidebar({
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-gray-100 p-4">
         <NavUser user={data.user} />
       </SidebarFooter>
       <SidebarRail />

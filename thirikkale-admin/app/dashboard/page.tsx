@@ -3,40 +3,97 @@ import { AppSidebar } from "@/components/app-sidebar"
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Loader } from "@/components/ui/loader"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useMemo } from "react"
 import { LoadingProvider } from "@/components/providers/LoaderProvider"
-import { PageHeaderProvider } from "@/components/providers/PageHeaderProvider"
+import { PageHeaderProvider, usePageHeader } from "@/components/providers/PageHeaderProvider"
 import { useSearchParams } from "next/navigation"
-import { Home, Users, Settings2, MapPinned, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
+import { Home, Users, Settings2, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
 import Dash from "@/components/dashboards/Dash"
+import { TopNavBar } from "@/components/TopNavBar"
+
 // Admin components
 import Analytics from "@/components/dashboards/admin/Analytics"
-import DriverManagement from "@/components/dashboards/admin/DriverManagement"
+import AdminDriverManagement from "@/components/dashboards/admin/DriverManagement"
 import Pricing from "@/components/dashboards/admin/Pricing"
-import RiderManagement from "@/components/dashboards/admin/RiderManagement"
+import AdminRiderManagement from "@/components/dashboards/admin/RiderManagement"
 import SystemSettings from "@/components/dashboards/admin/SystemSettings"
 import AdminManagement from "@/components/dashboards/admin/AdminManagement"
 import FinanceManagement from "@/components/dashboards/admin/FinanceManagement"
 
-// driver support components
-import DriverAccountManagement from "@/components/dashboards/driver-support/AccountManagement"
-import DriverActivityFeed from "@/components/dashboards/driver-support/ActivityFeed"
-import DriverDocumentVerification from "@/components/dashboards/driver-support/DocumentVerification"
-import DriverPerformance from "@/components/dashboards/driver-support/DriverPerformance"
-import DiverSupportTicket from "@/components/dashboards/driver-support/SupportTicket"
+// User Handler components
+import RiderManagement from "@/components/dashboards/user-handler/RiderManagement"
+import DriverManagement from "@/components/dashboards/user-handler/DriverManagement"
+import VehicleManagement from "@/components/dashboards/user-handler/VehicleManagement"
+import VerificationQueue from "@/components/dashboards/user-handler/VerificationQueue"
+import ReportedUsers from "@/components/dashboards/user-handler/ReportedUsers"
+import UserStatistics from "@/components/dashboards/user-handler/UserStatistics"
+import SettingsPage from "@/components/dashboards/user-handler/Settings"
 
-// rider support components
-import RiderAccountManagement from "@/components/dashboards/rider-support/AccountManagement"
-import RiderActivityFeed from "@/components/dashboards/rider-support/ActivityFeed"
-import RiderRatingsAndReviews from "@/components/dashboards/rider-support/RatingsAndReviews"
-import RiderVerification from "@/components/dashboards/rider-support/RiderVerification"
-import RiderSupportTickets from "@/components/dashboards/rider-support/SupportTickets"
+// Trip and Support Agent components
+import TripManagement from "@/components/dashboards/trip-support/TripManagement"
+import SupportTickets from "@/components/dashboards/trip-support/SupportTickets"
+import DriverSupport from "@/components/dashboards/trip-support/DriverSupport"
+
+// Marketing & Report Handler components
+import MarketingCampaigns from "@/components/dashboards/marketing-handler/MarketingCampaigns"
+import ReportGeneration from "@/components/dashboards/marketing-handler/ReportGeneration"
+import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalytics"
+
+// Finance Handler components
+import PaymentManagement from "@/components/dashboards/finance-handler/PaymentManagement"
+import TransactionMonitoring from "@/components/dashboards/finance-handler/TransactionMonitoring"
+import FinancialReports from "@/components/dashboards/finance-handler/FinancialReports"
+
+// Map userType to available tabs - matches the sidebar configuration
+const tabConfig = {
+  Admin: [
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
+    { title: "Admin Management", url: "dashboard?tab=admin-management", icon: UserCog },
+    { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
+    { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
+    { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
+    { title: "Company Revenue", url: "dashboard?tab=company-revenue", icon: HandCoins },
+    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
+    { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Settings },
+    { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings }
+  ],
+
+  UserHandler: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
+    { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
+    { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: Settings },
+    { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
+    { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Headset },
+    { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: Star },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
+  ],
+
+  TripSupport: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Settings2 },
+    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
+    { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+  ],
+
+  MarketingHandler: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumn },
+    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+  ],
+
+  FinanceHandler: [
+    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
+    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
+    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumn },
+  ],
+}
 
 export default function Page() {
   // ALL HOOKS MUST BE AT THE TOP - NO CONDITIONAL LOGIC BEFORE HOOKS
@@ -44,54 +101,9 @@ export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // State for page header management
-  const [pageHeader, setPageHeader] = useState<{
-    title: string
-    subtitle?: string
-  }>({ title: "", subtitle: "" })
-
   // Get userType from session
   const userType = session?.user?.userType
   const tab = searchParams.get("tab") || "dashboard"
-
-  // Map userType to available tabs
-  const tabConfig = {
-    Admin: [
-      { title: "Dashboard", url: "dashboard", icon: Home },
-      { title: "Admin Management", url: "dashboard?tab=admin-management", icon: UserCog },
-      { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
-      { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Settings2 },
-      { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
-      { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
-      { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Settings },
-      { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
-    ],
-    RiderSupport: [
-      { title: "Dashboard", url: "dashboard", icon: Home },
-      { title: "Rider Verification", url: "dashboard?tab=rider-verification", icon: UserRoundCheck },
-      { title: "Ratings & Reviews", url: "dashboard?tab=ratings-reviews", icon: Star },
-      { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-      { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
-      { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
-    ],
-    DriverSupport: [
-      { title: "Dashboard", url: "dashboard", icon: Home },
-      { title: "Document Verification", url: "dashboard?tab=document-verification", icon: UserRoundCheck },
-      { title: "Driver Performance", url: "dashboard?tab=driver-performance", icon: Star },
-      { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-      { title: "Account Management", url: "dashboard?tab=account-management", icon: UserCog },
-      { title: "Activity Feed", url: "dashboard?tab=activity-feed", icon: Activity },
-    ],
-  } as const
-
-  const tabs = userType ? tabConfig[userType as keyof typeof tabConfig] : []
-
-  // Find the current tab config
-  const currentTab = tabs.find(t =>
-    t.url === "dashboard"
-      ? tab === "dashboard"
-      : t.url.endsWith(`tab=${tab}`)
-  ) || tabs[0]
 
   // FIRST useEffect: Authentication check
   useEffect(() => {
@@ -109,7 +121,8 @@ export default function Page() {
 
   // THIRD useEffect: Tab validation
   useEffect(() => {
-    if (userType && tab !== "dashboard" && tabs.length > 0) {
+    if (userType && tab !== "dashboard") {
+      const tabs = userType ? tabConfig[userType as keyof typeof tabConfig] : []
       const isValidTab = tabs.some(t =>
         t.url.endsWith(`tab=${tab}`)
       )
@@ -118,17 +131,7 @@ export default function Page() {
         router.push("/dashboard")
       }
     }
-  }, [tab, tabs, router, userType])
-
-  // FOURTH useEffect: Update page header based on current tab
-  useEffect(() => {
-    if (currentTab && currentTab.title) {
-      setPageHeader({
-        title: currentTab.title,
-        subtitle: `Manage and monitor ${currentTab.title.toLowerCase()} activities`
-      })
-    }
-  }, [currentTab?.title]) // Only depend on the title, not the entire currentTab object
+  }, [tab, router, userType])
 
   // NOW we can have conditional returns AFTER all hooks
   if (status === "loading") {
@@ -147,101 +150,153 @@ export default function Page() {
     )
   }
 
-  // Render different components based on currentTab.title and userType
+  return (
+    <LoadingProvider>
+      <PageHeaderProvider>
+        <SidebarProvider>
+          <AppSidebar userType={userType as "Admin" | "UserHandler" | "TripSupport" | "MarketingHandler" | "FinanceHandler"} />
+          <SidebarInset>
+            <DashboardContent />
+          </SidebarInset>
+        </SidebarProvider>
+      </PageHeaderProvider>
+    </LoadingProvider>
+  )
+}
+
+function DashboardContent() {
+  const { pageHeader } = usePageHeader()
+  const searchParams = useSearchParams()
+  const { data: session } = useSession()
+  const userType = session?.user?.userType
+  const tab = searchParams.get("tab") || "dashboard"
+
+  const tabs = useMemo(() => {
+    return userType ? tabConfig[userType as keyof typeof tabConfig] : []
+  }, [userType])
+
+  // Find the current tab config
+  const currentTab = tabs.find(t =>
+    t.url === "dashboard"
+      ? tab === "dashboard"
+      : t.url.endsWith(`tab=${tab}`)
+  ) || tabs[0]
+
+  // Render different components based on tab parameter and userType
   const renderTabComponent = () => {
     if (!currentTab) return <Dash />
 
-    switch (currentTab.title) {
-      case "Dashboard":
-        return <Dash />
-      
-      // Admin-only components
-      case "Admin Management":
-        return userType === "Admin" ? <AdminManagement /> : <Dash />
-      case "Rider Management":
-        return userType === "Admin" ? <RiderManagement /> : <Dash />
-      case "Driver Management":
-        return userType === "Admin" ? <DriverManagement /> : <Dash />
-      case "Finance Management":
-        return userType === "Admin" ? <FinanceManagement /> : <Dash />
-      case "Reports & Analytics":
-        return userType === "Admin" ? <Analytics /> : <Dash />
-      case "Pricing & Policy Manage":
-        return userType === "Admin" ? <Pricing /> : <Dash />
-      case "System Settings":
-        return userType === "Admin" ? <SystemSettings /> : <Dash />
-      
-      // Rider Support components
-      case "Rider Verification":
-        return userType === "RiderSupport" ? <RiderVerification /> : <Dash />
-      case "Ratings & Reviews":
-        return userType === "RiderSupport" ? <RiderRatingsAndReviews /> : <Dash />
-      
-      // Driver Support components
-      case "Document Verification":
-        return userType === "DriverSupport" ? <DriverDocumentVerification /> : <Dash />
-      case "Driver Performance":
-        return userType === "DriverSupport" ? <DriverPerformance /> : <Dash />
-      
-      // Shared components that need user-type specific handling
-      case "Support Tickets":
-        switch (userType) {
-          case "RiderSupport":
-            return <RiderSupportTickets />
-          case "DriverSupport":
-            return <DiverSupportTicket />
-          default:
-            return <Dash />
-        }
-      
-      case "Account Management":
-        switch (userType) {
-          case "RiderSupport":
-            return <RiderAccountManagement />
-          case "DriverSupport":
-            return <DriverAccountManagement />
-          default:
-            return <Dash />
-        }
-      
-      case "Activity Feed":
-        switch (userType) {
-          case "RiderSupport":
-            return <RiderActivityFeed />
-          case "DriverSupport":
-            return <DriverActivityFeed />
-          default:
-            return <Dash />
-        }
-      
-      default:
-        return <Dash />
+    const tabTitle = currentTab.title
+
+    // Handle Dashboard tabs
+    if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {
+      return <Dash />
     }
+
+    // Handle Admin-only components
+    if (userType === "Admin") {
+      if (tabTitle === "Admin Management") {
+        return <AdminManagement />
+      }
+      if (tabTitle === "Rider Management") {
+        return <AdminRiderManagement />
+      }
+      if (tabTitle === "Driver Management") {
+        return <AdminDriverManagement />
+      }
+      if (tabTitle === "Finance Management") {
+        return <FinanceManagement />
+      }
+      if (tabTitle === "Company Revenue") {
+        return <FinanceManagement />
+      }
+      if (tabTitle === "Reports & Analytics") {
+        return <Analytics />
+      }
+      if (tabTitle === "Pricing & Policy Manage") {
+        return <Pricing />
+      }
+      if (tabTitle === "System Settings") {
+        return <SystemSettings />
+      }
+    }
+
+    // Handle UserHandler components
+    if (userType === "UserHandler") {
+      if (tabTitle === "Rider Management") {
+        return <RiderManagement />
+      }
+      if (tabTitle === "Driver Management") {
+        return <DriverManagement />
+      }
+      if (tabTitle === "Vehicle Management") {
+        return <VehicleManagement />
+      }
+      if (tabTitle === "Verification Queue") {
+        return <VerificationQueue />
+      }
+      if (tabTitle === "Reported Users") {
+        return <ReportedUsers />
+      }
+      if (tabTitle === "User Statistics") {
+        return <UserStatistics />
+      }
+      if (tabTitle === "Settings") {
+        return <SettingsPage />
+      }
+    }
+
+    // Handle TripSupport components
+    if (userType === "TripSupport") {
+      if (tabTitle === "Trip Management") {
+        return <TripManagement />
+      }
+      if (tabTitle === "Support Tickets") {
+        return <SupportTickets />
+      }
+      if (tabTitle === "Driver Support") {
+        return <DriverSupport />
+      }
+    }
+
+    // Handle MarketingHandler components
+    if (userType === "MarketingHandler") {
+      if (tabTitle === "Marketing Campaigns") {
+        return <MarketingCampaigns />
+      }
+      if (tabTitle === "Report Generation") {
+        return <ReportGeneration />
+      }
+      if (tabTitle === "Data Analytics") {
+        return <DataAnalytics />
+      }
+    }
+
+    // Handle FinanceHandler components
+    if (userType === "FinanceHandler") {
+      if (tabTitle === "Payment Management") {
+        return <PaymentManagement />
+      }
+      if (tabTitle === "Transaction Monitoring") {
+        return <TransactionMonitoring />
+      }
+      if (tabTitle === "Financial Reports") {
+        return <FinancialReports />
+      }
+    }
+
+    return <Dash />
   }
 
   return (
-    <LoadingProvider>
-      <SidebarProvider>
-        <AppSidebar userType={userType as "Admin" | "RiderSupport" | "DriverSupport"} />
-        <SidebarInset>
-          <header className="flex h-20 z-2 shrink-0 items-center gap-2 px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-18">
-            <SidebarTrigger className="-ml-1 -mt-6" />
-            <div className="flex flex-col flex-1 mt-4 pt-2 pl-2">
-              <h1 className="text-2xl font-bold text-gray-900">
-                {pageHeader.title || currentTab?.title || "Dashboard"}
-              </h1>
-              {pageHeader.subtitle && (
-                <p className="text-sm text-gray-600 mt-1 pb-4 mb-4">{pageHeader.subtitle}</p>
-              )}
-            </div>
-          </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <PageHeaderProvider setPageHeader={setPageHeader}>
-              {renderTabComponent()}
-            </PageHeaderProvider>
-          </div>
-        </SidebarInset>
-      </SidebarProvider>
-    </LoadingProvider>
+    <>
+      <TopNavBar
+        title={pageHeader.title}
+        subtitle={pageHeader.subtitle}
+      />
+      <div className="flex flex-1 flex-col gap-4 p-6 pt-6 overflow-auto">
+        {renderTabComponent()}
+      </div>
+    </>
   )
 }

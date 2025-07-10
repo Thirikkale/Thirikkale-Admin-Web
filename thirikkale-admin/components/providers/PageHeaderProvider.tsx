@@ -1,6 +1,6 @@
 "use client"
 
-import React, { createContext, useContext, ReactNode } from 'react'
+import React, { createContext, useContext, ReactNode, useState } from 'react'
 
 type PageHeader = {
   title: string
@@ -8,6 +8,7 @@ type PageHeader = {
 }
 
 type PageHeaderContextType = {
+  pageHeader: PageHeader
   setPageHeader: React.Dispatch<React.SetStateAction<PageHeader>>
 }
 
@@ -23,12 +24,19 @@ export function usePageHeader() {
 
 interface PageHeaderProviderProps {
   children: ReactNode
-  setPageHeader: React.Dispatch<React.SetStateAction<PageHeader>>
+  initialHeader?: PageHeader
 }
 
-export function PageHeaderProvider({ children, setPageHeader }: PageHeaderProviderProps) {
+export function PageHeaderProvider({ children, initialHeader }: PageHeaderProviderProps) {
+  const [pageHeader, setPageHeader] = useState<PageHeader>(
+    initialHeader || {
+      title: "Dashboard",
+      subtitle: "Welcome back! Here's what's happening today."
+    }
+  )
+
   return (
-    <PageHeaderContext.Provider value={{ setPageHeader }}>
+    <PageHeaderContext.Provider value={{ pageHeader, setPageHeader }}>
       {children}
     </PageHeaderContext.Provider>
   )

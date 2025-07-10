@@ -103,6 +103,14 @@ const sampleAdmins: Admin[] = [
 
 export default function AdminManagement() {
   const { setPageHeader } = usePageHeader()
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Admin Management",
+      subtitle: "Manage administrator accounts and permissions"
+    })
+  }, [setPageHeader])
+
   const [activeTab, setActiveTab] = useState('All')
   const [searchFilters, setSearchFilters] = useState({
     city: '',
@@ -111,13 +119,6 @@ export default function AdminManagement() {
     dateFrom: '',
     dateTo: ''
   })
-
-  useEffect(() => {
-    setPageHeader({
-      title: "Admin Management",
-      subtitle: "Manage administrator accounts, roles, and permissions across the platform"
-    })
-  }, [setPageHeader])
 
   const tabs = [
     { name: 'All', count: 24 },
@@ -155,6 +156,7 @@ export default function AdminManagement() {
 
   return (
     <div className="space-y-6 max-w-full overflow-hidden">
+
       {/* Content */}
       <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
         {/* Status Tabs */}
@@ -268,7 +270,7 @@ export default function AdminManagement() {
           </div>
 
           {/* Admin Rows */}
-          {sampleAdmins.map((admin, index) => (
+          {sampleAdmins.map((admin) => (
             <div key={admin.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
               <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
                 {/* Admin Info Column */}

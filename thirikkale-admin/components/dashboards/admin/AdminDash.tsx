@@ -1,11 +1,21 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, Car, MapPin, DollarSign, TrendingUp, TrendingDown, BarChart3, PieChart } from 'lucide-react'
+import { Users, Car, MapPin, DollarSign, TrendingUp, BarChart3, PieChart } from 'lucide-react'
+import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
-export default function Overview({ children }: { children: React.ReactNode }) {
+export default function Overview() {
+  const { setPageHeader } = usePageHeader()
+
+  useEffect(() => {
+    setPageHeader({
+      title: "Manager Dashboard",
+      subtitle: "Monitor transactions, payments, withdrawals, and financial analytics"
+    })
+  }, [setPageHeader])
+
   const [selectedPeriod, setSelectedPeriod] = useState('7 Days')
 
   const periods = ['7 Days', '30 Days', '90 Days']
@@ -41,8 +51,8 @@ export default function Overview({ children }: { children: React.ReactNode }) {
   return (
     <div className="space-y-6">
       {/* Header with time period selector */}
-      <div className="flex justify-end -mt-14 ">
-        <div className="flex gap-2 z-2">
+      <div className="flex justify-end">
+        <div className="flex gap-2">
           {periods.map((period) => (
             <Button
               key={period}
