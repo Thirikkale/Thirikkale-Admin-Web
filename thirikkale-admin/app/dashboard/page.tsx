@@ -28,8 +28,8 @@ import FinanceManagement from "@/components/dashboards/admin/FinanceManagement"
 import RiderManagement from "@/components/dashboards/user-handler/RiderManagement"
 import DriverManagement from "@/components/dashboards/user-handler/DriverManagement"
 import VehicleManagement from "@/components/dashboards/user-handler/VehicleManagement"
-import VerificationQueue from "@/components/dashboards/user-handler/VerificationQueue"
-import ReportedUsers from "@/components/dashboards/user-handler/ReportedUsers"
+import RiderReports from "@/components/dashboards/user-handler/RiderReports"
+import DriverReports from "@/components/dashboards/user-handler/DriverReports"
 import UserStatistics from "@/components/dashboards/user-handler/UserStatistics"
 import SettingsPage from "@/components/dashboards/user-handler/Settings"
 
@@ -69,6 +69,8 @@ const tabConfig = {
     { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: Settings },
     { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
     { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Headset },
+    { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
+    { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Settings2 },
     { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: Star },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
@@ -232,11 +234,11 @@ function DashboardContent() {
       if (tabTitle === "Vehicle Management") {
         return <VehicleManagement />
       }
-      if (tabTitle === "Verification Queue") {
-        return <VerificationQueue />
+      if (tabTitle === "Rider Reports") {
+        return <RiderReports />
       }
-      if (tabTitle === "Reported Users") {
-        return <ReportedUsers />
+      if (tabTitle === "Driver Reports") {
+        return <DriverReports />
       }
       if (tabTitle === "User Statistics") {
         return <UserStatistics />

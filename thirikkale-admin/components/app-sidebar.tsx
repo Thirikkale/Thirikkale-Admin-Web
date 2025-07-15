@@ -11,7 +11,6 @@ import {
   HandCoins,
   ChartColumnBig,
   Settings,
-  UserRoundCheck,
   Star,
   Headset,
   UserCog,
@@ -19,6 +18,7 @@ import {
   ChevronDown,
   PieChart,
   CarFront,
+  AlertTriangle,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -72,8 +72,13 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
     { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
     { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
     { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
-    { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
-    { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Shield },
+    {
+      title: "Reported Users", url: "dashboard?tab=reported-users", icon: AlertTriangle,
+      children: [
+        { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
+        { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Car },
+      ],
+    },
     { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: PieChart },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
