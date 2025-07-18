@@ -19,6 +19,10 @@ import {
   PieChart,
   CarFront,
   AlertTriangle,
+  MapPinned,
+  Clock,
+  BellRing,
+  Gavel,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -68,7 +72,7 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
     { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
   ],
   UserHandler: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
     { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
     { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
     { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
@@ -83,10 +87,21 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   TripSupport: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Car },
-    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-    { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
+    { title: "Live Trips", url: "dashboard?tab=live-trips", icon: MapPinned },
+    { title: "Trip History", url: "dashboard?tab=trip-history", icon: Clock },
+    { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: BellRing },
+    {
+      title: "Support Tickets",
+      icon: Headset,
+      children: [
+        { title: "Driver Support", url: "dashboard?tab=driver-support", icon: Car },
+        { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
+      ],
+    },
+    { title: "Complaints & Resolution", url: "dashboard?tab=disputes-resolutions", icon: Gavel },
+    { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Activity },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },

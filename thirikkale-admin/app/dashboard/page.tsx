@@ -34,9 +34,14 @@ import UserStatistics from "@/components/dashboards/user-handler/UserStatistics"
 import SettingsPage from "@/components/dashboards/user-handler/Settings"
 
 // Trip and Support Agent components
-import TripManagement from "@/components/dashboards/trip-support/TripManagement"
-import SupportTickets from "@/components/dashboards/trip-support/SupportTickets"
+import LiveTrips from "@/components/dashboards/trip-support/LiveTrips"
+import TripHistory from "@/components/dashboards/trip-support/TripHistory"
+import RiderSupport from "@/components/dashboards/trip-support/RiderSupport"
 import DriverSupport from "@/components/dashboards/trip-support/DriverSupport"
+import EmergencyAlerts from "@/components/dashboards/trip-support/EmergencyAlerts"
+import DisputesResolutions from "@/components/dashboards/trip-support/ComplaintsResolutions"
+import TripSupportDash from "@/components/dashboards/trip-support/TripSupportDash"
+import TripAnalytics from "@/components/dashboards/trip-support/TripAnalytics"
 
 // Marketing & Report Handler components
 import MarketingCampaigns from "@/components/dashboards/marketing-handler/MarketingCampaigns"
@@ -77,9 +82,14 @@ const tabConfig = {
 
   TripSupport: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Settings2 },
-    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
+    { title: "Live Trips", url: "dashboard?tab=live-trips", icon: Settings2 },
+    { title: "Trip History", url: "dashboard?tab=trip-history", icon: Activity },
+    { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: Headset },
     { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+    { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
+    { title: "Disputes & Resolutions", url: "dashboard?tab=disputes-resolutions", icon: Settings },
+    { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Star },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
   MarketingHandler: [
@@ -192,6 +202,9 @@ function DashboardContent() {
 
     // Handle Dashboard tabs
     if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {
+      if (userType === "TripSupport") {
+        return <TripSupportDash tab={tab} />
+      }
       return <Dash />
     }
 
@@ -250,14 +263,29 @@ function DashboardContent() {
 
     // Handle TripSupport components
     if (userType === "TripSupport") {
-      if (tabTitle === "Trip Management") {
-        return <TripManagement />
+      if (tabTitle === "Live Trips") {
+        return <LiveTrips />
       }
-      if (tabTitle === "Support Tickets") {
-        return <SupportTickets />
+      if (tabTitle === "Trip History") {
+        return <TripHistory />
+      }
+      if (tabTitle === "Emergency Alerts") {
+        return <EmergencyAlerts />
       }
       if (tabTitle === "Driver Support") {
         return <DriverSupport />
+      }
+      if (tabTitle === "Rider Support") {
+        return <RiderSupport />
+      }
+      if (tabTitle === "Disputes & Resolutions") {
+        return <DisputesResolutions />
+      }
+      if (tabTitle === "Trip Analytics") {
+        return <TripAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <SettingsPage />
       }
     }
 
