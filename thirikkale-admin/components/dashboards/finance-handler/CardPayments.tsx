@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
-    CreditCard,
+    Banknote,
     Search,
     Filter,
     Download,
@@ -19,7 +19,7 @@ import {
 } from "lucide-react"
 import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
-const CardTransactions = () => {
+const CardPayments = () => {
     const { setPageHeader } = usePageHeader()
     const [activeTab, setActiveTab] = useState('all')
     const [search, setSearch] = useState('')
@@ -31,6 +31,7 @@ const CardTransactions = () => {
         })
     }, [setPageHeader])
 
+    // Only card payments (cardType and cardLast4 must be present)
     const transactions = [
         {
             id: "CARD001",
@@ -45,31 +46,13 @@ const CardTransactions = () => {
             timestamp: "2025-01-27 14:30",
             status: "completed",
             location: "Downtown to Airport",
+            paymentStatus: "received",
+            verificationStatus: "verified",
             cardType: "Visa",
-            cardLast4: "1234",
-            paymentStatus: "processed",
-            transactionId: "TXN_CARD_001"
+            cardLast4: "1234"
         },
         {
             id: "CARD002",
-            tripId: "TRP-002",
-            riderId: "RDR101",
-            riderName: "Michael Brown",
-            driverId: "DRV789",
-            driverName: "Amal Perera",
-            amount: 1875.00,
-            commission: 281.00,
-            driverEarning: 1594.00,
-            timestamp: "2025-01-27 13:45",
-            status: "completed",
-            location: "Mall to University",
-            cardType: "Mastercard",
-            cardLast4: "5678",
-            paymentStatus: "processed",
-            transactionId: "TXN_CARD_002"
-        },
-        {
-            id: "CARD003",
             tripId: "TRP-003",
             riderId: "RDR234",
             riderName: "Emma Wilson",
@@ -81,31 +64,13 @@ const CardTransactions = () => {
             timestamp: "2025-01-27 12:20",
             status: "pending",
             location: "Hotel to Station",
-            cardType: "Visa",
-            cardLast4: "9012",
             paymentStatus: "pending",
-            transactionId: "TXN_CARD_003"
+            verificationStatus: "pending",
+            cardType: "Mastercard",
+            cardLast4: "5678"
         },
         {
-            id: "CARD004",
-            tripId: "TRP-004",
-            riderId: "RDR567",
-            riderName: "David Smith",
-            driverId: "DRV456",
-            driverName: "John Silva",
-            amount: 1525.00,
-            commission: 229.00,
-            driverEarning: 1296.00,
-            timestamp: "2025-01-27 11:15",
-            status: "disputed",
-            location: "Home to Office",
-            cardType: "American Express",
-            cardLast4: "3456",
-            paymentStatus: "disputed",
-            transactionId: "TXN_CARD_004"
-        },
-        {
-            id: "CARD005",
+            id: "CARD003",
             tripId: "TRP-005",
             riderId: "RDR890",
             riderName: "Lisa Wong",
@@ -117,10 +82,10 @@ const CardTransactions = () => {
             timestamp: "2025-01-27 10:30",
             status: "processing",
             location: "Airport to Hotel",
-            cardType: "Visa",
-            cardLast4: "7890",
             paymentStatus: "processing",
-            transactionId: "TXN_CARD_005"
+            verificationStatus: "pending",
+            cardType: "American Express",
+            cardLast4: "9012"
         }
     ]
 
@@ -162,13 +127,13 @@ const CardTransactions = () => {
         return matchesFilter && matchesSearch
     })
 
-    const totalCardToday = transactions.reduce((sum, t) => sum + t.amount, 0)
+    const totalCashToday = transactions.reduce((sum, t) => sum + t.amount, 0)
     const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0)
     const totalDriverEarnings = transactions.reduce((sum, t) => sum + t.driverEarning, 0)
 
     const metrics = {
         totalCard: {
-            value: `LKR ${totalCardToday.toLocaleString()}`,
+            value: `LKR ${totalCashToday.toLocaleString()}`,
             change: '+12.5%',
             trend: 'up',
             period: 'from yesterday'
@@ -209,10 +174,10 @@ const CardTransactions = () => {
 
             {/* Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Total Card */}
+                {/* Total Card Payments */}
                 <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
                     <CardHeader className="flex justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TOTAL CARD TODAY</CardTitle>
+                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TOTAL CARD PAYMENTS</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex justify-between items-center">
@@ -225,7 +190,7 @@ const CardTransactions = () => {
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-                                <CreditCard className="h-6 w-6 text-white" />
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" fill="none" /><line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="2" /></svg>
                             </div>
                         </div>
                     </CardContent>
@@ -345,7 +310,7 @@ const CardTransactions = () => {
                 <div className="w-full">
                     {/* Table Header */}
                     <div className="bg-gray-100 border-b-2 border-gray-300">
-                        <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '1fr 0.7fr 0.9fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
+                        <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
                             <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Transaction ID</div>
                             <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Trip ID</div>
                             <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Card Details</div>
@@ -360,7 +325,7 @@ const CardTransactions = () => {
                     {/* Table Body */}
                     {filteredTransactions.map((transaction) => (
                         <div key={transaction.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-                            <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '1fr 0.7fr 0.9fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
+                            <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
                                 {/* Transaction ID Column */}
                                 <div className="space-y-1">
                                     <p className="text-sm font-semibold text-gray-900">{transaction.id}</p>
@@ -375,12 +340,15 @@ const CardTransactions = () => {
                                 </div>
 
                                 {/* Card Details Column */}
-                                <div className="flex items-center gap-2">
-                                    <CreditCard className="h-4 w-4 text-gray-500" />
-                                    <div className="flex flex-col">
-                                        <span className="text-sm text-gray-700">{transaction.cardType}</span>
-                                        <span className="text-xs text-gray-500">****{transaction.cardLast4}</span>
-                                    </div>
+                                <div className="space-y-1">
+                                    {transaction.cardType && transaction.cardLast4 ? (
+                                        <span className="block text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2 py-1 rounded">
+                                            <span className="block">{transaction.cardType}</span>
+                                            <span className="block text-gray-500">****{transaction.cardLast4}</span>
+                                        </span>
+                                    ) : (
+                                        <span className="text-xs text-gray-400">-</span>
+                                    )}
                                 </div>
 
                                 {/* Trip Amount Column */}
@@ -423,7 +391,7 @@ const CardTransactions = () => {
 
                     {filteredTransactions.length === 0 && (
                         <div className="text-center py-12">
-                            <CreditCard className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                            <Banknote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                             <p className="text-gray-500">No transactions found matching your criteria</p>
                         </div>
                     )}
@@ -433,4 +401,4 @@ const CardTransactions = () => {
     )
 }
 
-export default CardTransactions
+export default CardPayments

@@ -12,6 +12,8 @@ import { LoadingProvider } from "@/components/providers/LoaderProvider"
 import { PageHeaderProvider, usePageHeader } from "@/components/providers/PageHeaderProvider"
 import { useSearchParams } from "next/navigation"
 import { Home, Users, Settings2, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
+import { Car, BarChart3 } from "lucide-react"
+import { PiggyBank, Wallet } from "lucide-react"
 import Dash from "@/components/dashboards/Dash"
 import { TopNavBar } from "@/components/TopNavBar"
 
@@ -48,14 +50,17 @@ import MarketingCampaigns from "@/components/dashboards/marketing-handler/Market
 import ReportGeneration from "@/components/dashboards/marketing-handler/ReportGeneration"
 import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalytics"
 
+
 // Finance Handler components
 import PaymentManagement from "@/components/dashboards/finance-handler/PaymentManagement"
-import DriverPayouts from "@/components/dashboards/finance-handler/DriverPayouts"
-import ReportsAnalytics from "@/components/dashboards/finance-handler/ReportsAnalytics"
+import DriverToCompany from "@/components/dashboards/finance-handler/DriverToCompany"
+import CompanyToDriver from "@/components/dashboards/finance-handler/CompanyToDriver"
+import FinanceAnalytics from "@/components/dashboards/finance-handler/FinancialAnalytics"
 import CashTransactions from "@/components/dashboards/finance-handler/CashPayments"
 import CardTransactions from "@/components/dashboards/finance-handler/CardPayments"
 import FinanceHandlerDash from "@/components/dashboards/finance-handler/FinanceHandlerDash"
 import TripsPayments from "@/components/dashboards/finance-handler/TripsPayments"
+import FinanceHandlerSettings from "@/components/dashboards/finance-handler/Settings"
 
 // Map userType to available tabs - matches the sidebar configuration
 const tabConfig = {
@@ -105,12 +110,14 @@ const tabConfig = {
 
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
     { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
     { title: "Cash", url: "dashboard?tab=cash-transactions", icon: HandCoins },
     { title: "Card", url: "dashboard?tab=card-transactions", icon: Activity },
-    { title: "Driver Payouts", url: "dashboard?tab=driver-payouts", icon: Users },
-    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Settings2 },
-    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
+    { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: PiggyBank },
+    { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: Wallet },
+    { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 }
 
@@ -323,14 +330,20 @@ function DashboardContent() {
       if (tabTitle === "Card") {
         return <CardTransactions />
       }
-      if (tabTitle === "Driver Payouts") {
-        return <DriverPayouts />
+      if (tabTitle === "Driver to Company") {
+        return <DriverToCompany />
+      }
+      if (tabTitle === "Company to Driver") {
+        return <CompanyToDriver />
       }
       if (tabTitle === "Trips & Payments") {
         return <TripsPayments />
       }
-      if (tabTitle === "Reports & Analytics") {
-        return <ReportsAnalytics />
+      if (tabTitle === "Financial Analytics" || tabTitle === "Reports & Analytics") {
+        return <FinanceAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <FinanceHandlerSettings />
       }
     }
 

@@ -27,6 +27,8 @@ import {
   Banknote,
   DollarSign,
   BarChart3,
+  ArrowUpRight,
+  ArrowDownLeft,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -124,8 +126,15 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
         { title: "Card", url: "dashboard?tab=card-transactions", icon: CreditCard },
       ],
     },
-    { title: "Driver Payouts", url: "dashboard?tab=driver-payouts", icon: DollarSign },
-    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: BarChart3 },
+    {
+      title: "Driver Payouts",
+      icon: DollarSign,
+      children: [
+        { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: ArrowUpRight },
+        { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: ArrowDownLeft },
+      ]
+    },
+    { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 }
