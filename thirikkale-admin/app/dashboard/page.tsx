@@ -50,8 +50,12 @@ import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalyti
 
 // Finance Handler components
 import PaymentManagement from "@/components/dashboards/finance-handler/PaymentManagement"
-import TransactionMonitoring from "@/components/dashboards/finance-handler/TransactionMonitoring"
-import FinancialReports from "@/components/dashboards/finance-handler/FinancialReports"
+import DriverPayouts from "@/components/dashboards/finance-handler/DriverPayouts"
+import ReportsAnalytics from "@/components/dashboards/finance-handler/ReportsAnalytics"
+import CashTransactions from "@/components/dashboards/finance-handler/CashPayments"
+import CardTransactions from "@/components/dashboards/finance-handler/CardPayments"
+import FinanceHandlerDash from "@/components/dashboards/finance-handler/FinanceHandlerDash"
+import TripsPayments from "@/components/dashboards/finance-handler/TripsPayments"
 
 // Map userType to available tabs - matches the sidebar configuration
 const tabConfig = {
@@ -102,8 +106,11 @@ const tabConfig = {
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
-    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
-    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumn },
+    { title: "Cash", url: "dashboard?tab=cash-transactions", icon: HandCoins },
+    { title: "Card", url: "dashboard?tab=card-transactions", icon: Activity },
+    { title: "Driver Payouts", url: "dashboard?tab=driver-payouts", icon: Users },
+    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Settings2 },
+    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumn },
   ],
 }
 
@@ -204,6 +211,9 @@ function DashboardContent() {
     if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {
       if (userType === "TripSupport") {
         return <TripSupportDash tab={tab} />
+      }
+      if (userType === "FinanceHandler") {
+        return <FinanceHandlerDash />
       }
       return <Dash />
     }
@@ -307,11 +317,20 @@ function DashboardContent() {
       if (tabTitle === "Payment Management") {
         return <PaymentManagement />
       }
-      if (tabTitle === "Transaction Monitoring") {
-        return <TransactionMonitoring />
+      if (tabTitle === "Cash") {
+        return <CashTransactions />
       }
-      if (tabTitle === "Financial Reports") {
-        return <FinancialReports />
+      if (tabTitle === "Card") {
+        return <CardTransactions />
+      }
+      if (tabTitle === "Driver Payouts") {
+        return <DriverPayouts />
+      }
+      if (tabTitle === "Trips & Payments") {
+        return <TripsPayments />
+      }
+      if (tabTitle === "Reports & Analytics") {
+        return <ReportsAnalytics />
       }
     }
 

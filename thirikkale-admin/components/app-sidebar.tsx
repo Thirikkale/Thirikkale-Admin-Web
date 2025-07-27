@@ -23,6 +23,10 @@ import {
   Clock,
   BellRing,
   Gavel,
+  CreditCard,
+  Banknote,
+  DollarSign,
+  BarChart3,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -111,9 +115,18 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
   ],
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
-    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
-    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumnBig },
+    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
+    {
+      title: "Payment Management",
+      icon: HandCoins,
+      children: [
+        { title: "Cash", url: "dashboard?tab=cash-transactions", icon: Banknote },
+        { title: "Card", url: "dashboard?tab=card-transactions", icon: CreditCard },
+      ],
+    },
+    { title: "Driver Payouts", url: "dashboard?tab=driver-payouts", icon: DollarSign },
+    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 }
 
