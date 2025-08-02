@@ -53,9 +53,7 @@ import PointRules from "@/components/dashboards/marketing-handler/PointRules"
 import RewardTiers from "@/components/dashboards/marketing-handler/RewardTiers"
 import UserPoints from "@/components/dashboards/marketing-handler/UserPoints"
 import RedemptionHistory from "@/components/dashboards/marketing-handler/RedemptionHistory"
-import ReferralUsers from "@/components/dashboards/marketing-handler/ReferralUsers"
-import ReferredUsers from "@/components/dashboards/marketing-handler/ReferredUsers"
-import ReferralPrograms from "@/components/dashboards/marketing-handler/ReferralPrograms"
+
 import SeasonalOffers from "@/components/dashboards/marketing-handler/SeasonalOffers"
 import PartnerCampaigns from "@/components/dashboards/marketing-handler/PartnerCampaigns"
 import Campaigns from "@/components/dashboards/marketing-handler/Campaigns"
@@ -118,9 +116,6 @@ const tabConfig = {
     { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
     { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
     { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Activity },
-    { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
-    { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
-    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
     { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Activity },
     { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Activity },
     { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Activity },
@@ -340,15 +335,6 @@ function DashboardContent() {
       }
       if (tabTitle === "Redemption History") {
         return <RedemptionHistory />
-      }
-      if (tabTitle === "Referral Users") {
-        return <ReferralUsers />
-      }
-      if (tabTitle === "Referred Users") {
-        return <ReferredUsers />
-      }
-      if (tabTitle === "Referral Programs") {
-        return <ReferralPrograms />
       }
       if (tabTitle === "Discount Codes") {
         return <PromotionCodes />
