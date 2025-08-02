@@ -46,9 +46,17 @@ import TripSupportDash from "@/components/dashboards/trip-support/TripSupportDas
 import TripAnalytics from "@/components/dashboards/trip-support/TripAnalytics"
 
 // Marketing & Report Handler components
-import MarketingCampaigns from "@/components/dashboards/marketing-handler/MarketingCampaigns"
-import ReportGeneration from "@/components/dashboards/marketing-handler/ReportGeneration"
 import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalytics"
+import LoyaltyPrograms from "@/components/dashboards/marketing-handler/LoyaltyPrograms"
+import PromotionCodes from "@/components/dashboards/marketing-handler/PromotionCodes"
+import MarketingHandlerSettings from "@/components/dashboards/marketing-handler/Settings"
+import PointRules from "@/components/dashboards/marketing-handler/PointRules"
+import RewardTiers from "@/components/dashboards/marketing-handler/RewardTiers"
+import UserPoints from "@/components/dashboards/marketing-handler/UserPoints"
+import RedemptionHistory from "@/components/dashboards/marketing-handler/RedemptionHistory"
+import ReferralRewards from "@/components/dashboards/marketing-handler/ReferralRewards"
+import SeasonalOffers from "@/components/dashboards/marketing-handler/SeasonalOffers"
+import PartnerCampaigns from "@/components/dashboards/marketing-handler/PartnerCampaigns"
 
 
 // Finance Handler components
@@ -103,9 +111,20 @@ const tabConfig = {
 
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumn },
-    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
+    { title: "Email Campaigns", url: "dashboard?tab=email-campaigns", icon: ChartColumn },
+    { title: "SMS Campaigns", url: "dashboard?tab=sms-campaigns", icon: Activity },
+    { title: "Push Notifications", url: "dashboard?tab=push-campaigns", icon: Star },
+    { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
+    { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
+    { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
+    { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Activity },
+    { title: "Referral Rewards", url: "dashboard?tab=referral-rewards", icon: HandCoins },
+    { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Activity },
+    { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Activity },
+    { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Activity },
+    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Star },
     { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
   FinanceHandler: [
@@ -308,14 +327,40 @@ function DashboardContent() {
 
     // Handle MarketingHandler components
     if (userType === "MarketingHandler") {
-      if (tabTitle === "Marketing Campaigns") {
-        return <MarketingCampaigns />
+      // Removed EmailCampaigns, SMSCampaigns, PushNotifications
+      if (tabTitle === "Point Rules") {
+        return <PointRules />
       }
-      if (tabTitle === "Report Generation") {
-        return <ReportGeneration />
+      if (tabTitle === "Reward Tiers") {
+        return <RewardTiers />
       }
+      if (tabTitle === "User Points") {
+        return <UserPoints />
+      }
+      if (tabTitle === "Redemption History") {
+        return <RedemptionHistory />
+      }
+      if (tabTitle === "Referral Rewards") {
+        return <ReferralRewards />
+      }
+      if (tabTitle === "Discount Codes") {
+        return <PromotionCodes />
+      }
+      if (tabTitle === "Seasonal Offers") {
+        return <SeasonalOffers />
+      }
+      if (tabTitle === "Partner Campaigns") {
+        return <PartnerCampaigns />
+      }
+      if (tabTitle === "Loyalty Programs") {
+        return <LoyaltyPrograms />
+      }
+      // Removed ReferralPrograms
       if (tabTitle === "Data Analytics") {
         return <DataAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <MarketingHandlerSettings />
       }
     }
 

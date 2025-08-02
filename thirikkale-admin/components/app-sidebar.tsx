@@ -29,6 +29,13 @@ import {
   BarChart3,
   ArrowUpRight,
   ArrowDownLeft,
+  Tag,
+  Percent,
+  Calendar,
+  Handshake,
+  Mail,
+  MessageSquare,
+  Bell,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -111,9 +118,38 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
   ],
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumnBig },
-    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
-    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+    {
+      title: "Campaigns",
+      icon: ChartColumnBig,
+      children: [
+        { title: "Email Campaigns", url: "dashboard?tab=email-campaigns", icon: Mail },
+        { title: "SMS Campaigns", url: "dashboard?tab=sms-campaigns", icon: MessageSquare },
+        { title: "Push Notifications", url: "dashboard?tab=push-campaigns", icon: Bell },
+      ],
+    },
+    {
+      title: "Loyalty Programs",
+      icon: Star,
+      children: [
+        { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
+        { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
+        { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
+        { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Clock },
+        { title: "Referral Rewards", url: "dashboard?tab=referral-rewards", icon: HandCoins },
+      ],
+    },
+    {
+      title: "Promotions",
+      icon: Tag,
+      children: [
+        { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Percent },
+        { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Calendar },
+        { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Handshake },
+      ],
+    },
+    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Users },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
