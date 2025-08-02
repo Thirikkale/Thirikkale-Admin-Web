@@ -1,102 +1,195 @@
 "use client";
 
+import React, { useEffect, useState } from "react";
 import { usePageHeader } from "@/components/providers/PageHeaderProvider";
-import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import {
     Gift,
     User,
     TrendingUp,
     Search,
-    Filter,
     Calendar,
-    Download,
     CheckCircle,
     Clock,
     AlertCircle,
     Star,
     Package,
-    Eye
+    Eye,
+    Edit
 } from "lucide-react";
+
+interface Redemption {
+    id: string;
+    userId: string;
+    userName: string;
+    userEmail: string;
+    city: string;
+    rewardType: string;
+    rewardValue: string;
+    pointsUsed: number;
+    remainingPoints: number;
+    status: "Redeemed" | "Pending" | "Processing" | "Expired";
+    redeemedAt: string;
+    usedAt: string | null;
+    expiresAt: string;
+    avatar: string;
+}
+
+const sampleRedemptions: Redemption[] = [
+    {
+        id: "R001",
+        userId: "U001",
+        userName: "John Doe",
+        userEmail: "john.doe@email.com",
+        city: "Colombo",
+        rewardType: "Ride Discount",
+        rewardValue: "10% off next ride",
+        pointsUsed: 500,
+        remainingPoints: 1950,
+        status: "Redeemed",
+        redeemedAt: "2024-01-15",
+        usedAt: "2024-01-15",
+        expiresAt: "2024-02-15",
+        avatar: "👨‍💼"
+    },
+    {
+        id: "R002",
+        userId: "U002",
+        userName: "Sarah Johnson",
+        userEmail: "sarah.j@email.com",
+        city: "Gampaha",
+        rewardType: "Free Ride",
+        rewardValue: "Up to $20 ride credit",
+        pointsUsed: 1500,
+        remainingPoints: 850,
+        status: "Pending",
+        redeemedAt: "2024-01-14",
+        usedAt: null,
+        expiresAt: "2024-02-14",
+        avatar: "👩‍💻"
+    },
+    {
+        id: "R003",
+        userId: "U003",
+        userName: "Mike Chen",
+        userEmail: "mike.chen@email.com",
+        city: "Kandy",
+        rewardType: "Gift Card",
+        rewardValue: "$50 Amazon Gift Card",
+        pointsUsed: 2500,
+        remainingPoints: 13100,
+        status: "Processing",
+        redeemedAt: "2024-01-13",
+        usedAt: null,
+        expiresAt: "2024-03-13",
+        avatar: "👨‍🚀"
+    },
+    {
+        id: "R004",
+        userId: "U004",
+        userName: "Emily Davis",
+        userEmail: "emily.d@email.com",
+        city: "Matara",
+        rewardType: "Priority Booking",
+        rewardValue: "24h priority booking",
+        pointsUsed: 300,
+        remainingPoints: 340,
+        status: "Expired",
+        redeemedAt: "2023-12-10",
+        usedAt: null,
+        expiresAt: "2024-01-10",
+        avatar: "👩‍🎨"
+    },
+    {
+        id: "R005",
+        userId: "U001",
+        userName: "John Doe",
+        userEmail: "john.doe@email.com",
+        city: "Colombo",
+        rewardType: "Premium Upgrade",
+        rewardValue: "Business class upgrade",
+        pointsUsed: 800,
+        remainingPoints: 1650,
+        status: "Redeemed",
+        redeemedAt: "2024-01-12",
+        usedAt: "2024-01-12",
+        expiresAt: "2024-02-12",
+        avatar: "👨‍💼"
+    },
+    {
+        id: "R006",
+        userId: "U005",
+        userName: "David Wilson",
+        userEmail: "david.w@email.com",
+        city: "Negombo",
+        rewardType: "Meal Voucher",
+        rewardValue: "$25 restaurant credit",
+        pointsUsed: 750,
+        remainingPoints: 7050,
+        status: "Processing",
+        redeemedAt: "2024-01-11",
+        usedAt: null,
+        expiresAt: "2024-02-11",
+        avatar: "👨‍🔬"
+    },
+    {
+        id: "R007",
+        userId: "U006",
+        userName: "Lisa Brown",
+        userEmail: "lisa.b@email.com",
+        city: "Galle",
+        rewardType: "Fuel Discount",
+        rewardValue: "15% off fuel purchase",
+        pointsUsed: 400,
+        remainingPoints: 180,
+        status: "Pending",
+        redeemedAt: "2024-01-10",
+        usedAt: null,
+        expiresAt: "2024-02-10",
+        avatar: "👩‍🏫"
+    },
+    {
+        id: "R008",
+        userId: "U007",
+        userName: "Ahmed Hassan",
+        userEmail: "ahmed.h@email.com",
+        city: "Jaffna",
+        rewardType: "Shopping Voucher",
+        rewardValue: "$100 mall credit",
+        pointsUsed: 3000,
+        remainingPoints: 1200,
+        status: "Redeemed",
+        redeemedAt: "2024-01-09",
+        usedAt: "2024-01-20",
+        expiresAt: "2024-04-09",
+        avatar: "👨‍⚕️"
+    }
+];
+
+const tabs = [
+    { name: 'All', count: 1234 },
+    { name: 'Redeemed', count: 890 },
+    { name: 'Pending', count: 234 },
+    { name: 'Processing', count: 78 },
+    { name: 'Expired', count: 32 }
+];
 
 export default function RedemptionHistory() {
     const { setPageHeader } = usePageHeader();
-    const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
+    const [activeTab, setActiveTab] = useState('All');
+    const [searchFilters, setSearchFilters] = useState({
+        id: '',
+        userName: '',
+        dateFrom: '',
+        dateTo: ''
+    });
 
     useEffect(() => {
         setPageHeader({
             title: "Redemption History",
-            subtitle: "Track point redemptions and reward claims"
+            subtitle: "Track point redemptions and reward claims across all users"
         });
     }, [setPageHeader]);
-
-    const redemptions = [
-        {
-            id: 1,
-            userId: 1,
-            userName: "John Doe",
-            userEmail: "john.doe@email.com",
-            rewardType: "Ride Discount",
-            rewardValue: "10% off next ride",
-            pointsUsed: 500,
-            status: "Redeemed",
-            redeemedAt: "2024-01-15T14:30:00",
-            usedAt: "2024-01-15T18:45:00",
-            expiresAt: "2024-02-15T14:30:00"
-        },
-        {
-            id: 2,
-            userId: 2,
-            userName: "Sarah Johnson",
-            userEmail: "sarah.j@email.com",
-            rewardType: "Free Ride",
-            rewardValue: "Up to $20 ride credit",
-            pointsUsed: 1500,
-            status: "Pending",
-            redeemedAt: "2024-01-14T10:15:00",
-            usedAt: null,
-            expiresAt: "2024-02-14T10:15:00"
-        },
-        {
-            id: 3,
-            userId: 3,
-            userName: "Mike Chen",
-            userEmail: "mike.chen@email.com",
-            rewardType: "Gift Card",
-            rewardValue: "$50 Amazon Gift Card",
-            pointsUsed: 2500,
-            status: "Processing",
-            redeemedAt: "2024-01-13T16:20:00",
-            usedAt: null,
-            expiresAt: "2024-03-13T16:20:00"
-        },
-        {
-            id: 4,
-            userId: 4,
-            userName: "Emily Davis",
-            userEmail: "emily.d@email.com",
-            rewardType: "Priority Booking",
-            rewardValue: "24h priority booking",
-            pointsUsed: 300,
-            status: "Expired",
-            redeemedAt: "2023-12-10T09:30:00",
-            usedAt: null,
-            expiresAt: "2024-01-10T09:30:00"
-        },
-        {
-            id: 5,
-            userId: 1,
-            userName: "John Doe",
-            userEmail: "john.doe@email.com",
-            rewardType: "Premium Upgrade",
-            rewardValue: "Business class upgrade",
-            pointsUsed: 800,
-            status: "Redeemed",
-            redeemedAt: "2024-01-12T11:45:00",
-            usedAt: "2024-01-12T15:30:00",
-            expiresAt: "2024-02-12T11:45:00"
-        }
-    ];
 
     const stats = [
         {
@@ -114,14 +207,14 @@ export default function RedemptionHistory() {
             color: "text-yellow-600"
         },
         {
-            title: "Active Users",
+            title: "Active Redemptions",
             value: "456",
-            change: "Users who redeemed",
+            change: "Currently processing",
             icon: User,
             color: "text-blue-600"
         },
         {
-            title: "Avg Redemption",
+            title: "Avg Redemption Value",
             value: "720",
             change: "Points per redemption",
             icon: TrendingUp,
@@ -129,20 +222,31 @@ export default function RedemptionHistory() {
         }
     ];
 
-    const statusStats = [
-        { status: "Redeemed", count: 890, percentage: 72.1, color: "bg-green-100 text-green-700" },
-        { status: "Pending", count: 234, percentage: 19.0, color: "bg-yellow-100 text-yellow-700" },
-        { status: "Processing", count: 78, percentage: 6.3, color: "bg-blue-100 text-blue-700" },
-        { status: "Expired", count: 32, percentage: 2.6, color: "bg-red-100 text-red-700" }
-    ];
+    // Filter redemptions based on selected filters and active tab
+    const filteredRedemptions = sampleRedemptions.filter(redemption => {
+        // Filter by active tab
+        if (activeTab !== 'All') {
+            if (redemption.status !== activeTab) return false;
+        }
 
-    const filteredRedemptions = redemptions.filter(redemption => {
-        const matchesSearch = redemption.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            redemption.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            redemption.rewardType.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesStatus = statusFilter === "all" || redemption.status.toLowerCase() === statusFilter.toLowerCase();
-        return matchesSearch && matchesStatus;
+        // Filter by search filters
+        if (searchFilters.id && !redemption.id.toLowerCase().includes(searchFilters.id.toLowerCase())) return false;
+        if (searchFilters.userName && !redemption.userName.toLowerCase().includes(searchFilters.userName.toLowerCase())) return false;
+        if (searchFilters.dateFrom && new Date(redemption.redeemedAt) < new Date(searchFilters.dateFrom)) return false;
+        if (searchFilters.dateTo && new Date(redemption.redeemedAt) > new Date(searchFilters.dateTo)) return false;
+
+        return true;
     });
+
+    const getStatusBadgeStyle = (status: string) => {
+        switch (status) {
+            case "Redeemed": return "bg-green-100 text-green-800 border-green-200";
+            case "Pending": return "bg-yellow-100 text-yellow-800 border-yellow-200";
+            case "Processing": return "bg-blue-100 text-blue-800 border-blue-200";
+            case "Expired": return "bg-red-100 text-red-800 border-red-200";
+            default: return "bg-gray-100 text-gray-800 border-gray-200";
+        }
+    };
 
     const getStatusIcon = (status: string) => {
         switch (status) {
@@ -154,18 +258,12 @@ export default function RedemptionHistory() {
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "Redeemed": return "bg-green-100 text-green-700 border-green-200";
-            case "Pending": return "bg-yellow-100 text-yellow-700 border-yellow-200";
-            case "Processing": return "bg-blue-100 text-blue-700 border-blue-200";
-            case "Expired": return "bg-red-100 text-red-700 border-red-200";
-            default: return "bg-gray-100 text-gray-700 border-gray-200";
-        }
+    const handleFilterChange = (field: string, value: string) => {
+        setSearchFilters(prev => ({ ...prev, [field]: value }));
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 max-w-full overflow-hidden">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {stats.map((stat, index) => (
@@ -184,149 +282,201 @@ export default function RedemptionHistory() {
                 ))}
             </div>
 
-            {/* Status Distribution */}
-            <div className="bg-white border border-gray-200 shadow-sm rounded-lg">
-                <div className="p-6 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-blue-600" />
-                        Redemption Status Distribution
-                    </h3>
-                </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {statusStats.map((stat, index) => (
-                            <div key={index} className="text-center">
-                                <div className={`inline-flex items-center px-3 py-2 rounded-lg ${stat.color} mb-2`}>
-                                    <span className="font-medium">{stat.status}</span>
-                                </div>
-                                <div className="text-2xl font-bold text-gray-900">{stat.count}</div>
-                                <div className="text-sm text-gray-600">{stat.percentage}%</div>
-                            </div>
+            {/* Main Content */}
+            <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                {/* Status Tabs */}
+                <div className="border-b border-gray-200">
+                    <div className="flex overflow-x-auto">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.name}
+                                onClick={() => setActiveTab(tab.name)}
+                                className={`flex-shrink-0 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.name
+                                    ? 'border-blue-500 text-blue-600 bg-blue-50'
+                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    }`}
+                            >
+                                {tab.name}
+                                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${activeTab === tab.name ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}>
+                                    {tab.count}
+                                </span>
+                            </button>
                         ))}
                     </div>
                 </div>
-            </div>
 
-            {/* Main Content */}
-            <div className="bg-white border border-gray-200 shadow-sm rounded-lg">
-                <div className="p-6 border-b border-gray-100">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-900">Redemption History</h2>
-                            <p className="text-gray-600 mt-1">
-                                Track all point redemptions and reward claims
-                            </p>
-                        </div>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg border border-blue-600 text-sm font-medium flex items-center gap-2">
-                            <Download className="h-4 w-4" />
-                            Export
-                        </button>
-                    </div>
-                </div>
-                <div className="p-6">
-                    {/* Search and Filters */}
-                    <div className="flex items-center gap-4 mb-6">
-                        <div className="flex-1 relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                {/* Search Filters */}
+                <div className="p-6 border-b border-gray-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {/* Redemption ID Filter */}
+                        <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Search redemptions..."
-                                value={searchTerm}
-                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                placeholder="Redemption ID"
+                                value={searchFilters.id}
+                                onChange={(e) => handleFilterChange('id', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
+                            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                         </div>
-                        <select
-                            value={statusFilter}
-                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="redeemed">Redeemed</option>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="expired">Expired</option>
-                        </select>
-                        <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2">
-                            <Filter className="h-4 w-4" />
-                            More Filters
-                        </button>
+
+                        {/* User Name Filter */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="User Name"
+                                value={searchFilters.userName}
+                                onChange={(e) => handleFilterChange('userName', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                        </div>
+
+                        {/* Date From Filter */}
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={searchFilters.dateFrom}
+                                onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                        </div>
+
+                        {/* Date To Filter */}
+                        <div className="relative">
+                            <input
+                                type="date"
+                                value={searchFilters.dateTo}
+                                onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                            <Calendar className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-hidden">
+                    {/* Table Header */}
+                    <div className="bg-gray-100 border-b-2 border-gray-300">
+                        <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr 1.5fr' }}>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">User Info</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Reward Details</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Points Used</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Remaining Points</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Redeemed Date</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Expires Date</div>
+                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
+                        </div>
                     </div>
 
-                    {/* Redemptions Table */}
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="border-b border-gray-200">
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">User</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Reward</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Points Used</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Status</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Redeemed</th>
-                                    <th className="text-left py-3 px-4 font-medium text-gray-900">Expires</th>
-                                    <th className="text-right py-3 px-4 font-medium text-gray-900">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredRedemptions.map((redemption) => {
-                                    const StatusIcon = getStatusIcon(redemption.status);
-                                    return (
-                                        <tr key={redemption.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                            <td className="py-4 px-4">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">{redemption.userName}</div>
-                                                    <div className="text-gray-600">{redemption.userEmail}</div>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4">
-                                                <div>
-                                                    <div className="font-medium text-gray-900">{redemption.rewardType}</div>
-                                                    <div className="text-gray-600">{redemption.rewardValue}</div>
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4">
-                                                <span className="inline-flex items-center gap-1 font-medium text-gray-900">
-                                                    <Star className="h-4 w-4 text-yellow-500" />
-                                                    {redemption.pointsUsed.toLocaleString()}
+                    {/* Redemption Rows */}
+                    {filteredRedemptions.map((redemption) => {
+                        const StatusIcon = getStatusIcon(redemption.status);
+                        return (
+                            <div key={redemption.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+                                <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr 1fr 1fr 1.5fr' }}>
+                                    {/* User Info Column */}
+                                    <div className="flex items-center space-x-3">
+                                        <div className="flex-shrink-0">
+                                            <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm border border-gray-300">
+                                                {redemption.avatar}
+                                            </div>
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="mb-1">
+                                                <p className="text-sm font-semibold text-gray-900 truncate">{redemption.userName}</p>
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">{redemption.city}</p>
+                                            <div className="flex items-center space-x-2 mt-1">
+                                                <span className="text-xs text-gray-400">ID:</span>
+                                                <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                                                    {redemption.id}
                                                 </span>
-                                            </td>
-                                            <td className="py-4 px-4">
-                                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(redemption.status)}`}>
-                                                    <StatusIcon className="h-3 w-3" />
-                                                    {redemption.status}
-                                                </span>
-                                            </td>
-                                            <td className="py-4 px-4">
-                                                <div className="flex items-center gap-1 text-gray-600">
-                                                    <Calendar className="h-4 w-4" />
-                                                    {new Date(redemption.redeemedAt).toLocaleDateString()}
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4">
-                                                <div className="text-gray-600">
-                                                    {new Date(redemption.expiresAt).toLocaleDateString()}
-                                                </div>
-                                            </td>
-                                            <td className="py-4 px-4 text-right">
-                                                <button className="p-2 hover:bg-gray-100 rounded-lg">
-                                                    <Eye className="h-4 w-4 text-gray-600" />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
+                                            </div>
+                                            <p className="text-xs text-gray-500 truncate">{redemption.userEmail}</p>
+                                        </div>
+                                    </div>
 
+                                    {/* Reward Details Column */}
+                                    <div className="text-center">
+                                        <div className="mb-1">
+                                            <p className="text-sm font-semibold text-gray-900 truncate">{redemption.rewardType}</p>
+                                        </div>
+                                        <p className="text-xs text-gray-600 truncate">{redemption.rewardValue}</p>
+                                    </div>
+
+                                    {/* Points Used Column */}
+                                    <div className="text-center">
+                                        <div className="flex items-center justify-center gap-1 text-sm font-bold text-red-600">
+                                            <Star className="h-4 w-4 text-red-500" />
+                                            -{redemption.pointsUsed.toLocaleString()}
+                                        </div>
+                                    </div>
+
+                                    {/* Remaining Points Column */}
+                                    <div className="text-center">
+                                        <div className="flex items-center justify-center gap-1 text-sm font-bold text-green-600">
+                                            <Star className="h-4 w-4 text-green-500" />
+                                            {redemption.remainingPoints.toLocaleString()}
+                                        </div>
+                                    </div>
+
+                                    {/* Status Column */}
+                                    <div className="flex justify-center">
+                                        <Badge className={`${getStatusBadgeStyle(redemption.status)} border flex items-center gap-1`}>
+                                            <StatusIcon className="h-3 w-3" />
+                                            {redemption.status}
+                                        </Badge>
+                                    </div>
+
+                                    {/* Redeemed Date Column */}
+                                    <div className="text-sm text-gray-700 text-center">
+                                        {new Date(redemption.redeemedAt).toLocaleDateString()}
+                                    </div>
+
+                                    {/* Expires Date Column */}
+                                    <div className="text-sm text-gray-700 text-center">
+                                        {new Date(redemption.expiresAt).toLocaleDateString()}
+                                    </div>
+
+                                    {/* Actions Column */}
+                                    <div className="flex justify-center space-x-2">
+                                        <button className="text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-blue-50 transition-colors">
+                                            <Eye className="h-4 w-4" />
+                                        </button>
+                                        <button className="text-green-600 hover:text-green-800 p-1 rounded-md hover:bg-green-50 transition-colors">
+                                            <Edit className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* Empty State */}
                     {filteredRedemptions.length === 0 && (
-                        <div className="text-center py-8">
-                            <Gift className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-600">No redemptions found matching your search criteria</p>
+                        <div className="text-center py-12">
+                            <div className="text-gray-500">
+                                <div className="mx-auto h-12 w-12 text-gray-400 mb-4 flex items-center justify-center">
+                                    <Gift className="h-8 w-8" />
+                                </div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">No redemptions found</h3>
+                                <p className="text-gray-500">Try adjusting your filters or search criteria.</p>
+                            </div>
                         </div>
                     )}
                 </div>
             </div>
+
+            {/* Results Summary */}
+            {filteredRedemptions.length > 0 && (
+                <div className="text-sm text-gray-500 text-center">
+                    Showing {filteredRedemptions.length} of {sampleRedemptions.length} redemptions
+                </div>
+            )}
         </div>
     );
 }

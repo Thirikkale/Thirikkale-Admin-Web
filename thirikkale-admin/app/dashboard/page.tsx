@@ -47,16 +47,18 @@ import TripAnalytics from "@/components/dashboards/trip-support/TripAnalytics"
 
 // Marketing & Report Handler components
 import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalytics"
-import LoyaltyPrograms from "@/components/dashboards/marketing-handler/LoyaltyPrograms"
 import PromotionCodes from "@/components/dashboards/marketing-handler/PromotionCodes"
 import MarketingHandlerSettings from "@/components/dashboards/marketing-handler/Settings"
 import PointRules from "@/components/dashboards/marketing-handler/PointRules"
 import RewardTiers from "@/components/dashboards/marketing-handler/RewardTiers"
 import UserPoints from "@/components/dashboards/marketing-handler/UserPoints"
 import RedemptionHistory from "@/components/dashboards/marketing-handler/RedemptionHistory"
-import ReferralRewards from "@/components/dashboards/marketing-handler/ReferralRewards"
+import ReferralUsers from "@/components/dashboards/marketing-handler/ReferralUsers"
+import ReferredUsers from "@/components/dashboards/marketing-handler/ReferredUsers"
+import ReferralPrograms from "@/components/dashboards/marketing-handler/ReferralPrograms"
 import SeasonalOffers from "@/components/dashboards/marketing-handler/SeasonalOffers"
 import PartnerCampaigns from "@/components/dashboards/marketing-handler/PartnerCampaigns"
+import Campaigns from "@/components/dashboards/marketing-handler/Campaigns"
 
 
 // Finance Handler components
@@ -111,19 +113,18 @@ const tabConfig = {
 
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Email Campaigns", url: "dashboard?tab=email-campaigns", icon: ChartColumn },
-    { title: "SMS Campaigns", url: "dashboard?tab=sms-campaigns", icon: Activity },
-    { title: "Push Notifications", url: "dashboard?tab=push-campaigns", icon: Star },
+    { title: "Campaigns", url: "dashboard?tab=campaigns", icon: ChartColumn },
     { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
     { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
     { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
     { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Activity },
-    { title: "Referral Rewards", url: "dashboard?tab=referral-rewards", icon: HandCoins },
+    { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
+    { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
+    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
     { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Activity },
     { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Activity },
     { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Activity },
-    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Star },
-    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
@@ -340,8 +341,14 @@ function DashboardContent() {
       if (tabTitle === "Redemption History") {
         return <RedemptionHistory />
       }
-      if (tabTitle === "Referral Rewards") {
-        return <ReferralRewards />
+      if (tabTitle === "Referral Users") {
+        return <ReferralUsers />
+      }
+      if (tabTitle === "Referred Users") {
+        return <ReferredUsers />
+      }
+      if (tabTitle === "Referral Programs") {
+        return <ReferralPrograms />
       }
       if (tabTitle === "Discount Codes") {
         return <PromotionCodes />
@@ -349,13 +356,12 @@ function DashboardContent() {
       if (tabTitle === "Seasonal Offers") {
         return <SeasonalOffers />
       }
+      if (tabTitle === "Campaigns") {
+        return <Campaigns />
+      }
       if (tabTitle === "Partner Campaigns") {
         return <PartnerCampaigns />
       }
-      if (tabTitle === "Loyalty Programs") {
-        return <LoyaltyPrograms />
-      }
-      // Removed ReferralPrograms
       if (tabTitle === "Data Analytics") {
         return <DataAnalytics />
       }
