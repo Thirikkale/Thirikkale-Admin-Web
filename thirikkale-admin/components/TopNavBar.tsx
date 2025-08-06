@@ -85,13 +85,13 @@ export function TopNavBar({ title, subtitle = "Welcome back! Here's what's happe
             {/* Right side - Search, notifications, and user menu */}
             <div className="flex items-center gap-3 flex-shrink-0">
                 {/* Search */}
-                <div className="relative hidden md:block">
+                {/* <div className="relative hidden md:block">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <Input
                         placeholder="Search..."
                         className="w-64 xl:w-72 pl-10 h-9 bg-gray-50 border-gray-200 focus:bg-white focus:border-blue-300 focus:ring-1 focus:ring-blue-200"
                     />
-                </div>
+                </div> */}
 
                 {/* Notifications */}
                 <Button variant="ghost" size="icon" className="relative hover:bg-gray-100 h-9 w-9 flex-shrink-0">
@@ -102,12 +102,12 @@ export function TopNavBar({ title, subtitle = "Welcome back! Here's what's happe
                 </Button>
 
                 {/* Settings */}
-                <Button variant="ghost" size="icon" className="hover:bg-gray-100 h-9 w-9 flex-shrink-0">
+                {/* <Button variant="ghost" size="icon" className="hover:bg-gray-100 h-9 w-9 flex-shrink-0">
                     <Settings className="h-5 w-5 text-gray-600" />
-                </Button>
+                </Button> */}
 
                 {/* User Menu */}
-                <DropdownMenu>
+                {/* <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg h-10 flex-shrink-0">
                             <div className="flex items-center gap-3">
@@ -142,7 +142,7 @@ export function TopNavBar({ title, subtitle = "Welcome back! Here's what's happe
                             Log out
                         </DropdownMenuItem>
                     </DropdownMenuContent>
-                </DropdownMenu>
+                </DropdownMenu> */}
             </div>
         </header>
     )
