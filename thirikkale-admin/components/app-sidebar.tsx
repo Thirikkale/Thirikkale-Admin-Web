@@ -127,6 +127,15 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
       ],
     },
     {
+      title: "Referral Rewards",
+      icon: HandCoins,
+      children: [
+        { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
+        { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
+        { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
+      ],
+    },
+    {
       title: "Promotions",
       icon: Tag,
       children: [
