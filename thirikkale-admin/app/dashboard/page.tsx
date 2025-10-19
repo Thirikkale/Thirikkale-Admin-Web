@@ -60,7 +60,6 @@ import Campaigns from "@/components/dashboards/marketing-handler/Campaigns"
 
 
 // Finance Handler components
-import PaymentManagement from "@/components/dashboards/finance-handler/PaymentManagement"
 import DriverToCompany from "@/components/dashboards/finance-handler/DriverToCompany"
 import CompanyToDriver from "@/components/dashboards/finance-handler/CompanyToDriver"
 import FinanceAnalytics from "@/components/dashboards/finance-handler/FinancialAnalytics"
@@ -129,7 +128,6 @@ const tabConfig = {
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
     { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
-    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
     { title: "Cash", url: "dashboard?tab=cash-transactions", icon: HandCoins },
     { title: "Card", url: "dashboard?tab=card-transactions", icon: Activity },
     { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: PiggyBank },
@@ -364,9 +362,6 @@ function DashboardContent() {
 
     // Handle FinanceHandler components
     if (userType === "FinanceHandler") {
-      if (tabTitle === "Payment Management") {
-        return <PaymentManagement />
-      }
       if (tabTitle === "Cash") {
         return <CashTransactions />
       }

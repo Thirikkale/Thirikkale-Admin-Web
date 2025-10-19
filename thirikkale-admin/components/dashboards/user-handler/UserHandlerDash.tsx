@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Users, Car, CarFront, TrendingUp, BarChart3, PieChart, UserCheck, AlertTriangle, FileWarning, FileBarChart2 } from 'lucide-react'
+import { Users, Car, CarFront, TrendingUp, BarChart3, PieChart, UserCheck, AlertCircle, AlertTriangle, FileWarning, FileBarChart2, RefreshCw } from 'lucide-react'
 import { usePageHeader } from '@/components/providers/PageHeaderProvider'
+import { getAllDrivers, getAllRiders, getAllVehicles, type Driver, type Rider, type Vehicle } from '@/lib/api/adminService'
 
+interface DashboardMetrics {
+    pendingVerifications: number;
+    totalDrivers: number;
+    activeDrivers: number;
+    totalRiders: number;
+    activeRiders: number;
+    totalVehicles: number;
+    approvedVehicles: number;
+    riderReports: number;
+    driverReports: number;
+}
 
 export default function UserHandlerDash() {
     const { setPageHeader } = usePageHeader()
@@ -18,17 +30,83 @@ export default function UserHandlerDash() {
     const [selectedPeriod, setSelectedPeriod] = useState('7 Days')
     const periods = ['7 Days', '30 Days', '90 Days']
 
-    // Sample data - replace with real data from your API
-    const metrics = {
-        pendingVerifications: { value: '32', change: '-2', trend: 'down', period: 'this month' },
-        totalDrivers: { value: '210', change: '+3.1%', trend: 'up', period: 'this month' },
-        totalRiders: { value: '980', change: '+2.5%', trend: 'up', period: 'this month' },
-        totalVehicles: { value: '150', change: '+1.2%', trend: 'up', period: 'this month' },
-        riderReports: { value: '3', change: '+1', trend: 'up', period: 'this month' },
-        driverReports: { value: '4', change: '0', trend: 'flat', period: 'this month' },
+    const [metrics, setMetrics] = useState<DashboardMetrics>({
+        pendingVerifications: 0,
+        totalDrivers: 0,
+        activeDrivers: 0,
+        totalRiders: 0,
+        activeRiders: 0,
+        totalVehicles: 0,
+        approvedVehicles: 0,
+        riderReports: 0,
+        driverReports: 0,
+    })
+
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+    const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+
+    // Fetch dashboard data
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+
+            // Fetch all data in parallel
+            const [driversResponse, ridersResponse, vehiclesResponse] = await Promise.all([
+                getAllDrivers(),
+                getAllRiders(),
+                getAllVehicles(),
+            ])
+
+            // Process drivers data
+            const drivers = driversResponse.data || []
+            const verifiedDrivers = drivers.filter(d => d.isVerified)
+            const activeDrivers = drivers.filter(d => d.isAvailable && d.isVerified)
+            const pendingDrivers = drivers.filter(d => !d.isVerified)
+
+            // Process riders data
+            const riders = ridersResponse.data || []
+            const activeRiders = riders.filter(r => r.isActive && r.isPhoneVerified)
+
+            // Process vehicles data
+            const vehicles = vehiclesResponse.data || []
+            const approvedVehicles = vehicles.filter(v => v.verificationStatus === 'APPROVED')
+            const pendingVehicles = vehicles.filter(v => v.verificationStatus === 'PENDING')
+
+            // Calculate total pending verifications
+            const totalPendingVerifications = pendingDrivers.length + pendingVehicles.length
+
+            setMetrics({
+                pendingVerifications: totalPendingVerifications,
+                totalDrivers: drivers.length,
+                activeDrivers: activeDrivers.length,
+                totalRiders: riders.length,
+                activeRiders: activeRiders.length,
+                totalVehicles: vehicles.length,
+                approvedVehicles: approvedVehicles.length,
+                riderReports: 0, // TODO: Implement when reports API is available
+                driverReports: 0, // TODO: Implement when reports API is available
+            })
+
+            setLastUpdated(new Date())
+        } catch (err) {
+            console.error('Error fetching dashboard data:', err)
+            setError('Failed to fetch dashboard data')
+        } finally {
+            setLoading(false)
+        }
     }
 
-    // Sample recent activity
+    useEffect(() => {
+        fetchDashboardData()
+
+        // Auto-refresh every 5 minutes
+        const interval = setInterval(fetchDashboardData, 5 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [])
+
+    // Sample recent activity (this would come from an activity log API)
     const recentActivity = [
         { type: 'Verification', user: 'Kasun Rajapaksa', action: 'Verified new driver', time: '2 hours ago' },
         { type: 'Report', user: 'Sanduni Wickramasinghe', action: 'Reported for fraudulent activity', time: '5 hours ago' },
@@ -36,9 +114,20 @@ export default function UserHandlerDash() {
         { type: 'Rider', user: 'Nimal Perera', action: 'Completed registration', time: '2 days ago' },
     ]
 
+    if (loading && !lastUpdated) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="text-center">
+                    <RefreshCw className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
+                    <p className="text-gray-600">Loading dashboard data...</p>
+                </div>
+            </div>
+        )
+    }
+
     return (
         <div className="space-y-8">
-            {/* Header with time period selector */}
+            {/* Header with time period selector and refresh button */}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
                 <div className="flex flex-wrap gap-2">
                     {periods.map((period) => (
@@ -52,7 +141,38 @@ export default function UserHandlerDash() {
                         </Button>
                     ))}
                 </div>
+                <div className="flex items-center gap-4">
+                    {lastUpdated && (
+                        <span className="text-xs text-gray-500">
+                            Last updated: {lastUpdated.toLocaleTimeString()}
+                        </span>
+                    )}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={fetchDashboardData}
+                        disabled={loading}
+                        className="flex items-center gap-2"
+                    >
+                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                        Refresh
+                    </Button>
+                </div>
             </div>
+
+            {/* Error Alert */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600" />
+                    <div className="flex-1">
+                        <p className="text-sm font-medium text-red-800">{error}</p>
+                        <p className="text-xs text-red-600 mt-1">Please try refreshing the page</p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={fetchDashboardData}>
+                        Retry
+                    </Button>
+                </div>
+            )}
 
             {/* Metrics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -64,11 +184,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.pendingVerifications.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.pendingVerifications}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-red-500" />
-                                    <span className="text-xs text-red-500">{metrics.pendingVerifications.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.pendingVerifications.period}</span>
+                                    <span className="text-xs text-gray-500">Drivers & Vehicles</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-yellow-500 rounded-lg flex items-center justify-center">
@@ -85,11 +203,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.totalRiders.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.totalRiders}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500">{metrics.totalRiders.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.totalRiders.period}</span>
+                                    <span className="text-xs text-green-600 font-medium">{metrics.activeRiders} active</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-indigo-500 rounded-lg flex items-center justify-center">
@@ -106,11 +222,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.totalDrivers.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.totalDrivers}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500">{metrics.totalDrivers.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.totalDrivers.period}</span>
+                                    <span className="text-xs text-green-600 font-medium">{metrics.activeDrivers} active</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center">
@@ -127,11 +241,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.totalVehicles.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.totalVehicles}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500">{metrics.totalVehicles.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.totalVehicles.period}</span>
+                                    <span className="text-xs text-green-600 font-medium">{metrics.approvedVehicles} approved</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-gray-500 rounded-lg flex items-center justify-center">
@@ -149,11 +261,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.riderReports.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.riderReports}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500">{metrics.riderReports.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.riderReports.period}</span>
+                                    <span className="text-xs text-gray-500">Pending review</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-blue-400 rounded-lg flex items-center justify-center">
@@ -170,11 +280,9 @@ export default function UserHandlerDash() {
                     <CardContent>
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.driverReports.value}</div>
+                                <div className="text-2xl font-bold text-gray-900">{metrics.driverReports}</div>
                                 <div className="flex items-center gap-1 mt-1">
-                                    <TrendingUp className="h-3 w-3 text-gray-500" />
-                                    <span className="text-xs text-gray-500">{metrics.driverReports.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.driverReports.period}</span>
+                                    <span className="text-xs text-gray-500">Pending review</span>
                                 </div>
                             </div>
                             <div className="h-12 w-12 bg-gray-400 rounded-lg flex items-center justify-center">

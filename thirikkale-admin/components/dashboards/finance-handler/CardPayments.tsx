@@ -15,14 +15,43 @@ import {
     CheckCircle,
     Clock,
     AlertCircle,
-    User
+    User,
+    Loader2
 } from "lucide-react"
 import { usePageHeader } from '@/components/providers/PageHeaderProvider'
+import { getAllPayments, Payment } from '@/lib/api/adminService'
+
+interface CardTransaction {
+    id: string
+    readableId?: string // P00001 - for display
+    tripId: string
+    tripReadableId?: string // T00001 - for display
+    riderId: string
+    riderReadableId?: string // R00001 - for display
+    riderName: string
+    driverId: string
+    driverReadableId?: string // D00001 - for display
+    driverName: string
+    amount: number
+    commission: number
+    driverEarning: number
+    timestamp: string
+    status: string
+    location: string
+    paymentStatus: string
+    verificationStatus: string
+    paymentMethod: string
+    cardType: string | null
+    cardLast4: string | null
+}
 
 const CardPayments = () => {
     const { setPageHeader } = usePageHeader()
     const [activeTab, setActiveTab] = useState('all')
     const [search, setSearch] = useState('')
+    const [transactions, setTransactions] = useState<CardTransaction[]>([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
         setPageHeader({
@@ -31,63 +60,98 @@ const CardPayments = () => {
         })
     }, [setPageHeader])
 
-    // Only card payments (cardType and cardLast4 must be present)
-    const transactions = [
-        {
-            id: "CARD001",
-            tripId: "TRP-001",
-            riderId: "RDR789",
-            riderName: "Sarah Johnson",
-            driverId: "DRV456",
-            driverName: "John Silva",
-            amount: 2550.00,
-            commission: 383.00,
-            driverEarning: 2167.00,
-            timestamp: "2025-01-27 14:30",
-            status: "completed",
-            location: "Downtown to Airport",
-            paymentStatus: "received",
-            verificationStatus: "verified",
-            cardType: "Visa",
-            cardLast4: "1234"
-        },
-        {
-            id: "CARD002",
-            tripId: "TRP-003",
-            riderId: "RDR234",
-            riderName: "Emma Wilson",
-            driverId: "DRV123",
-            driverName: "Nimal Fernando",
-            amount: 3280.00,
-            commission: 492.00,
-            driverEarning: 2788.00,
-            timestamp: "2025-01-27 12:20",
-            status: "pending",
-            location: "Hotel to Station",
-            paymentStatus: "pending",
-            verificationStatus: "pending",
-            cardType: "Mastercard",
-            cardLast4: "5678"
-        },
-        {
-            id: "CARD003",
-            tripId: "TRP-005",
-            riderId: "RDR890",
-            riderName: "Lisa Wong",
-            driverId: "DRV200",
-            driverName: "Kamal Rajapakse",
-            amount: 2840.00,
-            commission: 426.00,
-            driverEarning: 2414.00,
-            timestamp: "2025-01-27 10:30",
-            status: "processing",
-            location: "Airport to Hotel",
-            paymentStatus: "processing",
-            verificationStatus: "pending",
-            cardType: "American Express",
-            cardLast4: "9012"
+    // Fetch payments from database
+    const fetchCardPayments = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+
+            console.log('Fetching all payments from database...')
+
+            // Get all payments
+            const paymentsResponse = await getAllPayments()
+
+            if (paymentsResponse.error || !paymentsResponse.data) {
+                throw new Error(paymentsResponse.error || 'Failed to fetch payments')
+            }
+
+            const allPayments = paymentsResponse.data
+            console.log('Total payments fetched:', allPayments.length)
+
+            // Filter only CARD payments
+            const cardPayments = allPayments.filter(payment => payment.paymentMethod === 'CARD')
+            console.log('Card payments found:', cardPayments.length)
+
+            // Map payments to transactions
+            const mappedTransactions: CardTransaction[] = cardPayments.map((payment: Payment) => {
+                const amount = payment.amount || 0
+                const platformFee = payment.platformFee || 0
+                const driverEarnings = payment.driverEarnings || 0
+
+                // Map payment status to transaction status
+                let transactionStatus = 'pending'
+                if (payment.status === 'COMPLETED') transactionStatus = 'completed'
+                else if (payment.status === 'PROCESSING') transactionStatus = 'processing'
+                else if (payment.status === 'FAILED') transactionStatus = 'disputed'
+                else if (payment.status === 'PENDING') transactionStatus = 'pending'
+
+                // Extract card details from transaction ID or gateway response
+                let cardType: string | null = null
+                let cardLast4: string | null = null
+
+                if (payment.transactionId) {
+                    // Try to extract card last 4 digits from transaction ID
+                    cardLast4 = payment.transactionId.slice(-4)
+                }
+
+                // Default card type for card payments
+                cardType = 'Visa' // You can enhance this to detect actual card type
+
+                return {
+                    id: payment.paymentId,
+                    readableId: payment.readableId, // P00001
+                    tripId: payment.rideId,
+                    tripReadableId: payment.rideReadableId, // T00001
+                    riderId: payment.riderId || 'N/A',
+                    riderReadableId: payment.riderReadableId, // R00001
+                    riderName: 'Rider', // We'll need to fetch rider details separately if needed
+                    driverId: payment.driverId || 'N/A',
+                    driverReadableId: payment.driverReadableId, // D00001
+                    driverName: 'Driver', // We'll need to fetch driver details separately if needed
+                    amount: Number(amount),
+                    commission: Number(platformFee),
+                    driverEarning: Number(driverEarnings),
+                    timestamp: payment.createdAt || new Date().toISOString(),
+                    status: transactionStatus,
+                    location: 'Trip Location', // This would need to come from ride details
+                    paymentStatus: payment.status.toLowerCase(),
+                    verificationStatus: payment.status === 'COMPLETED' ? 'verified' : 'pending',
+                    paymentMethod: payment.paymentMethod,
+                    cardType,
+                    cardLast4
+                }
+            })
+
+            console.log('Mapped transactions:', mappedTransactions)
+            setTransactions(mappedTransactions)
+
+        } catch (err) {
+            console.error('Error fetching card payments:', err)
+            setError(err instanceof Error ? err.message : 'Failed to fetch card payments')
+        } finally {
+            setLoading(false)
         }
-    ]
+    }
+
+    // Fetch data on component mount
+    useEffect(() => {
+        fetchCardPayments()
+    }, [])
+
+    // Refresh handler
+    const handleRefresh = () => {
+        fetchCardPayments()
+    }
 
     const tabs = [
         { name: 'all', label: 'All Payments', count: transactions.length },
@@ -119,7 +183,10 @@ const CardPayments = () => {
 
     const filteredTransactions = transactions.filter(transaction => {
         const matchesFilter = activeTab === 'all' || transaction.status === activeTab
-        const matchesSearch = transaction.id.toLowerCase().includes(search.toLowerCase()) ||
+        const matchesSearch =
+            (transaction.readableId && transaction.readableId.toLowerCase().includes(search.toLowerCase())) ||
+            transaction.id.toLowerCase().includes(search.toLowerCase()) ||
+            (transaction.tripReadableId && transaction.tripReadableId.toLowerCase().includes(search.toLowerCase())) ||
             transaction.tripId.toLowerCase().includes(search.toLowerCase()) ||
             transaction.riderName.toLowerCase().includes(search.toLowerCase()) ||
             transaction.driverName.toLowerCase().includes(search.toLowerCase()) ||
@@ -130,6 +197,8 @@ const CardPayments = () => {
     const totalCashToday = transactions.reduce((sum, t) => sum + t.amount, 0)
     const totalCommission = transactions.reduce((sum, t) => sum + t.commission, 0)
     const totalDriverEarnings = transactions.reduce((sum, t) => sum + t.driverEarning, 0)
+    const completedCount = transactions.filter(t => t.status === 'completed').length
+    const pendingCount = transactions.filter(t => t.status === 'pending' || t.status === 'processing').length
 
     const metrics = {
         totalCard: {
@@ -160,243 +229,283 @@ const CardPayments = () => {
 
     return (
         <div className="space-y-6">
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-3">
-                <Button variant="outline" size="sm">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                </Button>
-                <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                </Button>
-            </div>
-
-            {/* Metrics Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Total Card Payments */}
-                <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <CardHeader className="flex justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TOTAL CARD PAYMENTS</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.totalCard.value}</div>
-                                <div className="flex gap-1 items-center mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500 font-medium">{metrics.totalCard.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.totalCard.period}</span>
-                                </div>
-                            </div>
-                            <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" fill="none" /><line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="2" /></svg>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Commission */}
-                <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <CardHeader className="flex justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">COMMISSION</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.commission.value}</div>
-                                <div className="flex gap-1 items-center mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500 font-medium">{metrics.commission.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.commission.period}</span>
-                                </div>
-                            </div>
-                            <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
-                                <TrendingUp className="h-6 w-6 text-white" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Driver Earnings */}
-                <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <CardHeader className="flex justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">DRIVER EARNINGS</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.driverEarnings.value}</div>
-                                <div className="flex gap-1 items-center mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500 font-medium">{metrics.driverEarnings.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.driverEarnings.period}</span>
-                                </div>
-                            </div>
-                            <div className="h-12 w-12 bg-indigo-500 rounded-lg flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
-                                <User className="h-6 w-6 text-white" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Transactions Count */}
-                <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
-                    <CardHeader className="flex justify-between pb-2">
-                        <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TRANSACTIONS</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <div className="text-2xl font-bold text-gray-900">{metrics.transactions.value}</div>
-                                <div className="flex gap-1 items-center mt-1">
-                                    <TrendingUp className="h-3 w-3 text-green-500" />
-                                    <span className="text-xs text-green-500 font-medium">{metrics.transactions.change}</span>
-                                    <span className="text-xs text-gray-500">{metrics.transactions.period}</span>
-                                </div>
-                            </div>
-                            <div className="h-12 w-12 bg-amber-500 rounded-lg flex items-center justify-center group-hover:bg-amber-600 transition-colors">
-                                <Calendar className="h-6 w-6 text-white" />
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Transactions Table with Tabs */}
-            <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
-                {/* Status Tabs */}
-                <div className="border-b border-gray-200">
-                    <div className="flex overflow-hidden flex-wrap">
-                        {tabs.map((tab) => (
-                            <button
-                                key={tab.name}
-                                onClick={() => setActiveTab(tab.name)}
-                                className={`flex-shrink-0 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.name
-                                    ? 'border-blue-500 text-blue-600 bg-blue-50'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                                    }`}
-                            >
-                                {tab.label}
-                                <span className={`ml-2 px-2 py-1 rounded-full text-xs ${activeTab === tab.name ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
-                                    }`}>
-                                    {tab.count}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
+            {/* Loading State */}
+            {loading && (
+                <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                    <span className="ml-3 text-gray-600">Loading card payments...</span>
                 </div>
+            )}
 
-                {/* Search and Filter */}
-                <div className="p-6 border-b border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                            <Input
-                                placeholder="Search by transaction ID, trip ID, rider, driver, or location..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="pl-10"
-                            />
+            {/* Error State */}
+            {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="flex items-center">
+                        <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+                        <div>
+                            <p className="text-sm font-medium text-red-800">Error loading payments</p>
+                            <p className="text-sm text-red-600">{error}</p>
                         </div>
+                    </div>
+                    <Button
+                        onClick={handleRefresh}
+                        variant="outline"
+                        size="sm"
+                        className="mt-3"
+                    >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Try Again
+                    </Button>
+                </div>
+            )}
+
+            {/* Main Content */}
+            {!loading && !error && (
+                <>
+                    {/* Action Buttons */}
+                    <div className="flex justify-end gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleRefresh}
+                            disabled={loading}
+                        >
+                            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                            Refresh
+                        </Button>
                         <Button variant="outline" size="sm">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Filter
+                            <Download className="h-4 w-4 mr-2" />
+                            Export
                         </Button>
                     </div>
-                </div>
 
-                {/* Transactions Grid */}
-                <div className="w-full">
-                    {/* Table Header */}
-                    <div className="bg-gray-100 border-b-2 border-gray-300">
-                        <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
-                            <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Transaction ID</div>
-                            <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Trip ID</div>
-                            <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Card Details</div>
-                            <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Trip Amount</div>
-                            <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Commission (15%)</div>
-                            <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Payable to Driver</div>
-                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
-                            <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
-                        </div>
+                    {/* Metrics Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Total Card Payments */}
+                        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
+                            <CardHeader className="flex justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TOTAL CARD PAYMENTS</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-gray-900">{metrics.totalCard.value}</div>
+                                        <div className="flex gap-1 items-center mt-1">
+                                            <TrendingUp className="h-3 w-3 text-green-500" />
+                                            <span className="text-xs text-green-500 font-medium">{metrics.totalCard.change}</span>
+                                            <span className="text-xs text-gray-500">{metrics.totalCard.period}</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center group-hover:bg-purple-600 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2" fill="none" /><line x1="2" y1="10" x2="22" y2="10" stroke="currentColor" strokeWidth="2" /></svg>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Commission */}
+                        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
+                            <CardHeader className="flex justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">COMMISSION</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-gray-900">{metrics.commission.value}</div>
+                                        <div className="flex gap-1 items-center mt-1">
+                                            <TrendingUp className="h-3 w-3 text-green-500" />
+                                            <span className="text-xs text-green-500 font-medium">{metrics.commission.change}</span>
+                                            <span className="text-xs text-gray-500">{metrics.commission.period}</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center group-hover:bg-blue-600 transition-colors">
+                                        <TrendingUp className="h-6 w-6 text-white" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Driver Earnings */}
+                        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
+                            <CardHeader className="flex justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">DRIVER EARNINGS</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-gray-900">{metrics.driverEarnings.value}</div>
+                                        <div className="flex gap-1 items-center mt-1">
+                                            <TrendingUp className="h-3 w-3 text-green-500" />
+                                            <span className="text-xs text-green-500 font-medium">{metrics.driverEarnings.change}</span>
+                                            <span className="text-xs text-gray-500">{metrics.driverEarnings.period}</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-12 w-12 bg-indigo-500 rounded-lg flex items-center justify-center group-hover:bg-indigo-600 transition-colors">
+                                        <User className="h-6 w-6 text-white" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Transactions Count */}
+                        <Card className="bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer group">
+                            <CardHeader className="flex justify-between pb-2">
+                                <CardTitle className="text-sm font-medium text-gray-600 group-hover:text-gray-800">TRANSACTIONS</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="flex justify-between items-center">
+                                    <div>
+                                        <div className="text-2xl font-bold text-gray-900">{metrics.transactions.value}</div>
+                                        <div className="flex gap-1 items-center mt-1">
+                                            <TrendingUp className="h-3 w-3 text-green-500" />
+                                            <span className="text-xs text-green-500 font-medium">{metrics.transactions.change}</span>
+                                            <span className="text-xs text-gray-500">{metrics.transactions.period}</span>
+                                        </div>
+                                    </div>
+                                    <div className="h-12 w-12 bg-amber-500 rounded-lg flex items-center justify-center group-hover:bg-amber-600 transition-colors">
+                                        <Calendar className="h-6 w-6 text-white" />
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </div>
 
-                    {/* Table Body */}
-                    {filteredTransactions.map((transaction) => (
-                        <div key={transaction.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-                            <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
-                                {/* Transaction ID Column */}
-                                <div className="space-y-1">
-                                    <p className="text-sm font-semibold text-gray-900">{transaction.id}</p>
-                                    <p className="text-xs text-gray-500">{transaction.timestamp}</p>
-                                </div>
-
-                                {/* Trip ID Column */}
-                                <div className="space-y-2">
-                                    <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded font-medium">
-                                        {transaction.tripId}
-                                    </span>
-                                </div>
-
-                                {/* Card Details Column */}
-                                <div className="space-y-1">
-                                    {transaction.cardType && transaction.cardLast4 ? (
-                                        <span className="block text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2 py-1 rounded">
-                                            <span className="block">{transaction.cardType}</span>
-                                            <span className="block text-gray-500">****{transaction.cardLast4}</span>
+                    {/* Transactions Table with Tabs */}
+                    <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
+                        {/* Status Tabs */}
+                        <div className="border-b border-gray-200">
+                            <div className="flex overflow-hidden flex-wrap">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab.name}
+                                        onClick={() => setActiveTab(tab.name)}
+                                        className={`flex-shrink-0 px-6 py-4 text-sm font-medium whitespace-nowrap border-b-2 transition-colors ${activeTab === tab.name
+                                            ? 'border-blue-500 text-blue-600 bg-blue-50'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        {tab.label}
+                                        <span className={`ml-2 px-2 py-1 rounded-full text-xs ${activeTab === tab.name ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'
+                                            }`}>
+                                            {tab.count}
                                         </span>
-                                    ) : (
-                                        <span className="text-xs text-gray-400">-</span>
-                                    )}
-                                </div>
-
-                                {/* Trip Amount Column */}
-                                <div className="text-right">
-                                    <div className="text-sm font-semibold text-gray-900">LKR {transaction.amount.toLocaleString()}</div>
-                                </div>
-
-                                {/* Commission Column */}
-                                <div className="text-right">
-                                    <div className="text-sm font-semibold text-green-700">LKR {transaction.commission.toLocaleString()}</div>
-                                </div>
-
-                                {/* Payable to Driver Column */}
-                                <div className="text-right">
-                                    <div className="text-sm font-semibold text-blue-700">LKR {transaction.driverEarning.toLocaleString()}</div>
-                                </div>
-
-                                {/* Status Column */}
-                                <div className="flex justify-center">
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(transaction.status)}`}>
-                                        {getStatusIcon(transaction.status)}
-                                        {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                                    </span>
-                                </div>
-
-                                {/* Actions Column */}
-                                <div className="flex flex-col space-y-1 items-center">
-                                    <button className="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1 rounded-md border border-blue-300 hover:bg-blue-50 transition-colors w-full">
-                                        View
                                     </button>
-                                    {transaction.status === 'disputed' && (
-                                        <button className="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1 rounded-md border border-red-300 hover:bg-red-50 transition-colors w-full">
-                                            Resolve
-                                        </button>
-                                    )}
-                                </div>
+                                ))}
                             </div>
                         </div>
-                    ))}
 
-                    {filteredTransactions.length === 0 && (
-                        <div className="text-center py-12">
-                            <Banknote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                            <p className="text-gray-500">No transactions found matching your criteria</p>
+                        {/* Search and Filter */}
+                        <div className="p-6 border-b border-gray-200">
+                            <div className="flex items-center gap-4">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                                    <Input
+                                        placeholder="Search by payment ID (P00001), trip ID (T00001), rider, driver, or location..."
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                <Button variant="outline" size="sm">
+                                    <Filter className="h-4 w-4 mr-2" />
+                                    Filter
+                                </Button>
+                            </div>
                         </div>
-                    )}
-                </div>
-            </div>
+
+                        {/* Transactions Grid */}
+                        <div className="w-full">
+                            {/* Table Header */}
+                            <div className="bg-gray-100 border-b-2 border-gray-300">
+                                <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
+                                    <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Transaction ID</div>
+                                    <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Trip ID</div>
+                                    <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Card Details</div>
+                                    <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Trip Amount</div>
+                                    <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Commission (15%)</div>
+                                    <div className="text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Payable to Driver</div>
+                                    <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
+                                    <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
+                                </div>
+                            </div>
+
+                            {/* Table Body */}
+                            {filteredTransactions.map((transaction) => (
+                                <div key={transaction.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+                                    <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '1.2fr 1fr 1fr 1.1fr 1.1fr 1.1fr 0.8fr 0.8fr' }}>
+                                        {/* Transaction ID Column */}
+                                        <div className="space-y-1">
+                                            <p className="text-sm font-bold text-blue-600">{transaction.readableId || transaction.id.slice(0, 8)}</p>
+                                            <p className="text-xs text-gray-500">{transaction.timestamp}</p>
+                                        </div>
+
+                                        {/* Trip ID Column */}
+                                        <div className="space-y-2">
+                                            <span className="text-xs text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded font-semibold">
+                                                {transaction.tripReadableId || transaction.tripId.slice(0, 8)}
+                                            </span>
+                                        </div>
+
+                                        {/* Card Details Column */}
+                                        <div className="space-y-1">
+                                            {transaction.cardType && transaction.cardLast4 ? (
+                                                <span className="block text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 px-2 py-1 rounded">
+                                                    <span className="block">{transaction.cardType}</span>
+                                                    <span className="block text-gray-500">****{transaction.cardLast4}</span>
+                                                </span>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">-</span>
+                                            )}
+                                        </div>
+
+                                        {/* Trip Amount Column */}
+                                        <div className="text-right">
+                                            <div className="text-sm font-semibold text-gray-900">LKR {transaction.amount.toLocaleString()}</div>
+                                        </div>
+
+                                        {/* Commission Column */}
+                                        <div className="text-right">
+                                            <div className="text-sm font-semibold text-green-700">LKR {transaction.commission.toLocaleString()}</div>
+                                        </div>
+
+                                        {/* Payable to Driver Column */}
+                                        <div className="text-right">
+                                            <div className="text-sm font-semibold text-blue-700">LKR {transaction.driverEarning.toLocaleString()}</div>
+                                        </div>
+
+                                        {/* Status Column */}
+                                        <div className="flex justify-center">
+                                            <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(transaction.status)}`}>
+                                                {getStatusIcon(transaction.status)}
+                                                {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                                            </span>
+                                        </div>
+
+                                        {/* Actions Column */}
+                                        <div className="flex flex-col space-y-1 items-center">
+                                            <button className="text-blue-600 hover:text-blue-800 text-xs font-medium px-3 py-1 rounded-md border border-blue-300 hover:bg-blue-50 transition-colors w-full">
+                                                View
+                                            </button>
+                                            {transaction.status === 'disputed' && (
+                                                <button className="text-red-600 hover:text-red-800 text-xs font-medium px-3 py-1 rounded-md border border-red-300 hover:bg-red-50 transition-colors w-full">
+                                                    Resolve
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+
+                            {filteredTransactions.length === 0 && (
+                                <div className="text-center py-12">
+                                    <Banknote className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No transactions found matching your criteria</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     )
 }

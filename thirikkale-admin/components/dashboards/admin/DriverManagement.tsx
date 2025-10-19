@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { usePageHeader } from '@/components/providers/PageHeaderProvider'
+import { getAllDrivers, getPendingVerificationDrivers, getAvailableDrivers, mapDriverToFrontend, type Driver as BackendDriver } from '@/lib/api/adminService'
+import { Loader } from '@/components/ui/loader'
+import { AlertCircle } from 'lucide-react'
 
 interface Driver {
   id: string
@@ -9,101 +12,21 @@ interface Driver {
   gender: string
   vehicleType: string
   workExperience: string
-  status: 'Hire Overdue' | 'Active' | 'Pending' | 'Deactivated' | 'Online' | 'Offline'
+  status: string
   createdTime: string
   avatar: string
+  rating: number
+  totalRides: number
+  isVerified: boolean
+  isAvailable: boolean
 }
-
-const sampleDrivers: Driver[] = [
-  {
-    id: 'D50',
-    name: 'Kasun Rajapaksa',
-    city: 'Colombo',
-    email: 'kasun@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Car',
-    workExperience: '5 Years',
-    status: 'Online',
-    createdTime: '2025-04-26 10:01:41',
-    avatar: '🚗'
-  },
-  {
-    id: 'D51',
-    name: 'Thilaka Perera',
-    city: 'Kandy',
-    email: 'thilaka@gmail.com',
-    gender: 'Female',
-    vehicleType: 'Van',
-    workExperience: '3 Years',
-    status: 'Active',
-    createdTime: '2025-04-26 10:01:41',
-    avatar: '🚐'
-  },
-  {
-    id: 'D52',
-    name: 'Mahinda Silva',
-    city: 'Galle',
-    email: 'mahinda@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Motorcycle',
-    workExperience: '7 Years',
-    status: 'Online',
-    createdTime: '2025-04-25 14:30:15',
-    avatar: '🏍️'
-  },
-  {
-    id: 'D53',
-    name: 'Chaminda Fernando',
-    city: 'Matara',
-    email: 'chaminda@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Tuk Tuk',
-    workExperience: '4 Years',
-    status: 'Pending',
-    createdTime: '2025-04-24 09:15:30',
-    avatar: '🛺'
-  },
-  {
-    id: 'D54',
-    name: 'Sanduni Wickramasinghe',
-    city: 'Negombo',
-    email: 'sanduni@gmail.com',
-    gender: 'Female',
-    vehicleType: 'Car',
-    workExperience: '2 Years',
-    status: 'Offline',
-    createdTime: '2025-04-23 16:45:20',
-    avatar: '🚗'
-  },
-  {
-    id: 'D55',
-    name: 'Roshan Jayawardena',
-    city: 'Jaffna',
-    email: 'roshan@gmail.com',
-    gender: 'Male',
-    vehicleType: 'Van',
-    workExperience: '6 Years',
-    status: 'Active',
-    createdTime: '2025-04-22 11:20:10',
-    avatar: '🚐'
-  },
-  {
-    id: 'D56',
-    name: 'Nimali Rathnayake',
-    city: 'Kurunegala',
-    email: 'nimali@gmail.com',
-    gender: 'Female',
-    vehicleType: 'Motorcycle',
-    workExperience: '3 Years',
-    status: 'Deactivated',
-    createdTime: '2025-04-21 08:30:25',
-    avatar: '🏍️'
-  }
-]
 
 export default function DriverManagement() {
   const { setPageHeader } = usePageHeader()
   const [activeTab, setActiveTab] = useState('All')
+  const [drivers, setDrivers] = useState<Driver[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [searchFilters, setSearchFilters] = useState({
     city: '',
     id: '',
@@ -119,13 +42,107 @@ export default function DriverManagement() {
     })
   }, [setPageHeader])
 
+  // Fetch drivers based on active tab
+  useEffect(() => {
+    fetchDrivers()
+  }, [activeTab])
+
+  const fetchDrivers = async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      let response;
+
+      switch (activeTab) {
+        case 'Pending Requests':
+          response = await getPendingVerificationDrivers()
+          break
+        case 'Online Accounts':
+          response = await getAvailableDrivers()
+          break
+        default:
+          response = await getAllDrivers()
+      }
+
+      if (response.error) {
+        setError(response.error)
+        setDrivers([])
+      } else if (response.data) {
+        // Map backend data to frontend format
+        const mappedDrivers = response.data.map(mapDriverToFrontend)
+        setDrivers(mappedDrivers)
+      }
+    } catch (err) {
+      setError('Failed to fetch drivers')
+      console.error('Error fetching drivers:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Filter drivers based on active tab
+  const getFilteredDrivers = () => {
+    let filtered = drivers
+
+    // Apply tab filters
+    switch (activeTab) {
+      case 'Pending Requests':
+        filtered = drivers.filter(d => d.status === 'Pending' || d.status === 'Pending Documents')
+        break
+      case 'Activated Accounts':
+        filtered = drivers.filter(d => d.isVerified && d.status !== 'Deactivated')
+        break
+      case 'Deactivated Accounts':
+        filtered = drivers.filter(d => d.status === 'Deactivated')
+        break
+      case 'Online Accounts':
+        filtered = drivers.filter(d => d.status === 'Online')
+        break
+      case 'Offline Accounts':
+        filtered = drivers.filter(d => d.status === 'Offline')
+        break
+    }
+
+    // Apply search filters
+    if (searchFilters.city) {
+      filtered = filtered.filter(d =>
+        d.city.toLowerCase().includes(searchFilters.city.toLowerCase())
+      )
+    }
+    if (searchFilters.id) {
+      filtered = filtered.filter(d =>
+        d.id.toLowerCase().includes(searchFilters.id.toLowerCase())
+      )
+    }
+    if (searchFilters.name) {
+      filtered = filtered.filter(d =>
+        d.name.toLowerCase().includes(searchFilters.name.toLowerCase())
+      )
+    }
+
+    return filtered
+  }
+
+  const filteredDrivers = getFilteredDrivers()
+
+  // Calculate tab counts
+  const tabCounts = {
+    all: drivers.length,
+    pending: drivers.filter(d => d.status === 'Pending' || d.status === 'Pending Documents').length,
+    activated: drivers.filter(d => d.isVerified && d.status !== 'Deactivated').length,
+    deactivated: drivers.filter(d => d.status === 'Deactivated').length,
+    online: drivers.filter(d => d.status === 'Online').length,
+    offline: drivers.filter(d => d.status === 'Offline').length,
+  }
+
   const tabs = [
-    { name: 'All', count: 89 },
-    { name: 'Pending Requests', count: 15 },
-    { name: 'Activated Accounts', count: 52 },
-    { name: 'Deactivated Accounts', count: 5 },
-    { name: 'Online Accounts', count: 28 },
-    { name: 'Offline Accounts', count: 24 },
+    { name: 'All', count: tabCounts.all },
+    { name: 'Pending Requests', count: tabCounts.pending },
+    { name: 'Activated Accounts', count: tabCounts.activated },
+    { name: 'Deactivated Accounts', count: tabCounts.deactivated },
+    { name: 'Online Accounts', count: tabCounts.online },
+    { name: 'Offline Accounts', count: tabCounts.offline },
   ]
 
   const getStatusColor = (status: string) => {
@@ -135,6 +152,7 @@ export default function DriverManagement() {
       case 'Active':
         return 'bg-green-100 text-green-800 border border-green-200'
       case 'Pending':
+      case 'Pending Documents':
         return 'bg-yellow-100 text-yellow-800 border border-yellow-200'
       case 'Deactivated':
         return 'bg-gray-100 text-gray-800 border border-gray-200'
@@ -252,87 +270,119 @@ export default function DriverManagement() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-hidden">
-          {/* Table Header */}
-          <div className="bg-gray-100 border-b-2 border-gray-300">
-            <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Info</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Email Address</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Gender</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Type</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Experience</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
-              <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
-            </div>
+        {/* Loading State */}
+        {loading && (
+          <div className="p-12 flex justify-center items-center">
+            <Loader size="lg" text="Loading drivers..." />
           </div>
+        )}
 
-          {/* Driver Rows */}
-          {sampleDrivers.map((driver, index) => (
-            <div key={driver.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-              <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
-                {/* Driver Info Column */}
-                <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm border border-gray-300">
-                      {driver.avatar}
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="mb-1">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{driver.name}</p>
-                    </div>
-                    <p className="text-xs text-gray-500 truncate">{driver.city}</p>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <span className="text-xs text-gray-400">ID:</span>
-                      <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                        {driver.id}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400 truncate">{driver.createdTime}</p>
-                  </div>
-                </div>
+        {/* Error State */}
+        {error && (
+          <div className="p-6 bg-red-50 border-l-4 border-red-500">
+            <div className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+            <button
+              onClick={fetchDrivers}
+              className="mt-2 text-sm text-red-600 underline hover:text-red-800"
+            >
+              Try again
+            </button>
+          </div>
+        )}
 
-                {/* Email Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.email}>
-                  {driver.email}
-                </div>
+        {/* Empty State */}
+        {!loading && !error && filteredDrivers.length === 0 && (
+          <div className="p-12 text-center">
+            <p className="text-gray-500">No drivers found</p>
+          </div>
+        )}
 
-                {/* Gender Column */}
-                <div className="text-sm text-gray-700 text-center">
-                  {driver.gender}
-                </div>
-
-                {/* Vehicle Type Column */}
-                <div className="text-sm text-gray-700 truncate text-center" title={driver.vehicleType}>
-                  {driver.vehicleType}
-                </div>
-
-                {/* Experience Column */}
-                <div className="text-sm text-gray-700 text-center">
-                  {driver.workExperience}
-                </div>
-
-                {/* Status Column */}
-                <div className="text-center">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(driver.status)}`}>
-                    {driver.status}
-                  </span>
-                </div>
-
-                {/* Actions Column */}
-                <div className="flex flex-col space-y-1 items-center">
-                  <button className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded-md border border-blue-300 hover:bg-blue-50 transition-colors">
-                    View
-                  </button>
-                  <button className="text-red-600 hover:text-red-800 text-xs font-medium px-2 py-1 rounded-md border border-red-300 hover:bg-red-50 transition-colors">
-                    Edit
-                  </button>
-                </div>
+        {/* Table */}
+        {!loading && !error && filteredDrivers.length > 0 && (
+          <div className="overflow-hidden">
+            {/* Table Header */}
+            <div className="bg-gray-100 border-b-2 border-gray-300">
+              <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Info</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Email Address</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rating</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Type</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rides</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* Driver Rows */}
+            {filteredDrivers.map((driver) => (
+              <div key={driver.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
+                <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
+                  {/* Driver Info Column */}
+                  <div className="flex items-center space-x-3">
+                    <div className="flex-shrink-0">
+                      <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-sm border border-gray-300">
+                        {driver.avatar}
+                      </div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="mb-1">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{driver.name}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 truncate">{driver.city}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <span className="text-xs text-gray-400">ID:</span>
+                        <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
+                          {driver.id ? `${driver.id.substring(0, 8)}...` : 'N/A'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 truncate">{driver.createdTime}</p>
+                    </div>
+                  </div>
+
+                  {/* Email Column */}
+                  <div className="text-sm text-gray-700 truncate text-center" title={driver.email}>
+                    {driver.email}
+                  </div>
+
+                  {/* Rating Column */}
+                  <div className="text-sm text-gray-700 text-center">
+                    ⭐ {driver.rating.toFixed(1)}
+                  </div>
+
+                  {/* Vehicle Type Column */}
+                  <div className="text-sm text-gray-700 truncate text-center" title={driver.vehicleType}>
+                    {driver.vehicleType}
+                  </div>
+
+                  {/* Rides Column */}
+                  <div className="text-sm text-gray-700 text-center">
+                    {driver.totalRides}
+                  </div>
+
+                  {/* Status Column */}
+                  <div className="text-center">
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap ${getStatusColor(driver.status)}`}>
+                      {driver.status}
+                    </span>
+                  </div>
+
+                  {/* Actions Column */}
+                  <div className="flex flex-col space-y-1 items-center">
+                    <button className="text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 rounded-md border border-blue-300 hover:bg-blue-50 transition-colors">
+                      View
+                    </button>
+                    <button className="text-green-600 hover:text-green-800 text-xs font-medium px-2 py-1 rounded-md border border-green-300 hover:bg-green-50 transition-colors">
+                      {driver.isVerified ? 'Verified ✓' : 'Verify'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
