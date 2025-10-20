@@ -15,105 +15,125 @@ import {
 } from 'lucide-react'
 import { usePageHeader } from '@/components/providers/PageHeaderProvider'
 
-export default function DriverSupport() {
+export default function RiderSupport() {
     const { setPageHeader } = usePageHeader()
     const [activeTab, setActiveTab] = useState('all')
     const [search, setSearch] = useState('')
 
     useEffect(() => {
         setPageHeader({
-            title: "Driver Support",
-            subtitle: "Technical assistance and system-related issue resolution for drivers"
+            title: "Rider Support",
+            subtitle: "Technical assistance and system-related issue resolution for riders"
         })
     }, [setPageHeader])
 
     const tabs = [
-        { name: 'all', label: 'All Issues', count: 4 },
-        { name: 'critical', label: 'Critical', count: 1 },
+        { name: 'all', label: 'All Issues', count: 5 },
+        { name: 'critical', label: 'Critical', count: 2 },
         { name: 'open', label: 'Open', count: 2 },
         { name: 'resolved', label: 'Resolved', count: 1 }
     ]
 
     const tickets = [
         {
-            id: 'DST-001',
-            driver: 'John Silva',
-            driverId: 'D001',
-            phone: '+94 77 123 4567',
-            email: 'john.silva@email.com',
-            rating: 4.8,
-            issue: 'App crashes during trip booking',
-            category: 'App Bug',
+            id: 'RST-001',
+            rider: 'Sarah Johnson',
+            riderId: 'R001',
+            phone: '+94 77 234 5678',
+            email: 'sarah.johnson@email.com',
+            rating: 4.9,
+            issue: 'Payment processing failure',
+            category: 'Payment System',
             priority: 'critical',
             status: 'critical',
-            created: '2024-01-15 14:30',
-            lastUpdate: '2024-01-15 15:45',
-            location: 'Colombo-Kandy Highway',
-            description: 'Mobile app force closes when attempting to accept ride requests. Driver unable to work.',
-            systemError: 'Error Code: APP_CRASH_001',
-            deviceInfo: 'Android 12, App v2.1.3',
-            deviceBrand: 'Samsung Galaxy S21',
-            deviceModel: 'SM-G991B'
+            created: '2024-01-15 16:45',
+            lastUpdate: '2024-01-15 17:30',
+            location: 'Colombo City Center',
+            description: 'Credit card payment keeps getting declined despite sufficient funds. Unable to book rides.',
+            systemError: 'Error Code: PAY_PROCESS_FAIL',
+            deviceInfo: 'iOS 16.3, App v2.1.3',
+            deviceBrand: 'iPhone 13 Pro Max',
+            deviceModel: 'A2484'
         },
         {
-            id: 'DST-002',
-            driver: 'Amal Perera',
-            driverId: 'D002',
-            phone: '+94 76 987 6543',
-            email: 'amal.perera@email.com',
-            rating: 4.6,
-            issue: 'GPS navigation not updating location',
-            category: 'Navigation System',
+            id: 'RST-002',
+            rider: 'Michael Chen',
+            riderId: 'R002',
+            phone: '+94 76 345 6789',
+            email: 'michael.chen@email.com',
+            rating: 4.5,
+            issue: 'App freezes during ride booking',
+            category: 'App Bug',
+            priority: 'critical',
+            status: 'open',
+            created: '2024-01-15 15:20',
+            lastUpdate: '2024-01-15 16:10',
+            location: 'Kandy Road, Malabe',
+            description: 'App becomes unresponsive when trying to select pickup location. Force close required.',
+            systemError: 'Error Code: UI_FREEZE_BOOKING',
+            deviceInfo: 'Android 13, App v2.1.3',
+            deviceBrand: 'Samsung Galaxy S23',
+            deviceModel: 'SM-S911B'
+        },
+        {
+            id: 'RST-003',
+            rider: 'Priya Patel',
+            riderId: 'R003',
+            phone: '+94 71 456 7890',
+            email: 'priya.patel@email.com',
+            rating: 4.7,
+            issue: 'Location tracking not accurate',
+            category: 'GPS System',
             priority: 'high',
             status: 'open',
-            created: '2024-01-15 13:15',
-            lastUpdate: '2024-01-15 16:20',
-            location: 'Galle Face, Colombo',
-            description: 'Driver location not updating in real-time, causing passenger confusion and pickup delays.',
-            systemError: 'Error Code: GPS_SYNC_FAIL',
-            deviceInfo: 'iOS 16.2, App v2.1.3',
-            deviceBrand: 'iPhone 14 Pro',
-            deviceModel: 'A2890'
+            created: '2024-01-15 14:15',
+            lastUpdate: '2024-01-15 15:45',
+            location: 'Nugegoda Junction',
+            description: 'App shows wrong current location, causing drivers to go to incorrect pickup points.',
+            systemError: 'Error Code: GPS_LOCATION_DRIFT',
+            deviceInfo: 'Android 12, App v2.1.2',
+            deviceBrand: 'OnePlus 10 Pro',
+            deviceModel: 'NE2213'
         },
         {
-            id: 'DST-003',
-            driver: 'Nimal Fernando',
-            driverId: 'D003',
-            phone: '+94 71 555 7890',
-            email: 'nimal.fernando@email.com',
-            rating: 4.9,
-            issue: 'Trip completion button not responding',
-            category: 'UI/UX Bug',
+            id: 'RST-004',
+            rider: 'David Williams',
+            riderId: 'R004',
+            phone: '+94 75 567 8901',
+            email: 'david.williams@email.com',
+            rating: 4.3,
+            issue: 'Push notifications not working',
+            category: 'Notification System',
             priority: 'medium',
             status: 'open',
-            created: '2024-01-15 12:00',
-            lastUpdate: '2024-01-15 14:30',
-            location: 'Mount Lavinia',
-            description: 'Unable to mark trips as completed. Button appears disabled even when trip is finished.',
-            systemError: 'Error Code: UI_FREEZE_003',
-            deviceInfo: 'Android 11, App v2.1.2',
-            deviceBrand: 'Xiaomi Redmi Note 10',
-            deviceModel: 'M2101K7BG'
+            created: '2024-01-15 13:30',
+            lastUpdate: '2024-01-15 14:20',
+            location: 'Mount Lavinia Beach',
+            description: 'Not receiving notifications about driver arrival or trip updates.',
+            systemError: 'Error Code: NOTIF_SERVICE_DOWN',
+            deviceInfo: 'iOS 15.7, App v2.1.1',
+            deviceBrand: 'iPhone 12',
+            deviceModel: 'A2172'
         },
         {
-            id: 'DST-004',
-            driver: 'Sunil Wickramasinghe',
-            driverId: 'D004',
-            phone: '+94 75 246 8135',
-            email: 'sunil.w@email.com',
-            rating: 4.7,
-            issue: 'Offline mode sync issue resolved',
+            id: 'RST-005',
+            rider: 'Aisha Rahman',
+            riderId: 'R005',
+            phone: '+94 78 678 9012',
+            email: 'aisha.rahman@email.com',
+            rating: 4.8,
+            issue: 'Ride history sync resolved',
             category: 'Data Sync',
             priority: 'low',
             status: 'resolved',
-            created: '2024-01-15 10:00',
-            lastUpdate: '2024-01-15 11:30',
-            location: 'Bambalapitiya',
-            description: 'Trip data not syncing when network connection restored. Fixed with app restart.',
-            systemError: 'Error Code: SYNC_QUEUE_FAIL',
-            deviceInfo: 'Android 13, App v2.1.3',
-            deviceBrand: 'Google Pixel 7',
-            deviceModel: 'GVU6C'
+            created: '2024-01-15 11:00',
+            lastUpdate: '2024-01-15 12:15',
+            location: 'Galle Face Green',
+            description: 'Previous rides not showing in history. Fixed after account re-sync.',
+            systemError: 'Error Code: HISTORY_SYNC_FAIL',
+            deviceInfo: 'Android 11, App v2.1.3',
+            deviceBrand: 'Google Pixel 6',
+            deviceModel: 'GB7N6'
         }
     ]
 
@@ -148,13 +168,36 @@ export default function DriverSupport() {
     const filteredTickets = tickets.filter(ticket => {
         const matchesFilter = activeTab === 'all' || ticket.status === activeTab
         const matchesSearch = ticket.id.toLowerCase().includes(search.toLowerCase()) ||
-            ticket.driver.toLowerCase().includes(search.toLowerCase()) ||
+            ticket.rider.toLowerCase().includes(search.toLowerCase()) ||
             ticket.issue.toLowerCase().includes(search.toLowerCase())
         return matchesFilter && matchesSearch
     })
 
     return (
         <div className="space-y-6">
+            {/* Export and Quick Stats */}
+            <div className="flex justify-between items-center">
+                <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="text-gray-600 border-gray-300 hover:bg-gray-50">
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                        Refresh Data
+                    </Button>
+                    <Button variant="outline" size="sm" className="text-blue-600 border-blue-300 hover:bg-blue-50">
+                        Export System Issues
+                    </Button>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                    <div className="bg-blue-50 px-3 py-1 rounded-lg border border-blue-200">
+                        <span className="font-medium text-blue-800">Total Issues: {tickets.length}</span>
+                    </div>
+                    <div className="bg-red-50 px-3 py-1 rounded-lg border border-red-200">
+                        <span className="font-medium text-red-800">Critical: {tickets.filter(ticket => ticket.priority === 'critical').length}</span>
+                    </div>
+                    <div className="bg-green-50 px-3 py-1 rounded-lg border border-green-200">
+                        <span className="font-medium text-green-800">Resolved: {tickets.filter(ticket => ticket.status === 'resolved').length}</span>
+                    </div>
+                </div>
+            </div>
 
             {/* Support Issues Table */}
             <div className="bg-white border border-gray-200 shadow-sm rounded-lg overflow-hidden">
@@ -185,7 +228,7 @@ export default function DriverSupport() {
                     <div className="flex items-center gap-4">
                         <input
                             type="text"
-                            placeholder="Search by issue ID, driver, or system error"
+                            placeholder="Search by issue ID, rider, or system error"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -203,7 +246,7 @@ export default function DriverSupport() {
                         <div className="bg-gray-100 border-b-2 border-gray-300">
                             <div className="grid gap-6 px-6 py-4" style={{ gridTemplateColumns: '0.6fr 1.6fr 2fr 1.3fr 1fr 0.9fr' }}>
                                 <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Issue ID</div>
-                                <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Driver</div>
+                                <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Rider</div>
                                 <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">System Issue & Details</div>
                                 <div className="text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Device & Contact</div>
                                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Priority & Status</div>
@@ -220,19 +263,19 @@ export default function DriverSupport() {
                                         <p className="text-xs text-gray-500">{ticket.created.split(' ')[1]}</p>
                                     </div>
 
-                                    {/* Driver Column */}
+                                    {/* Rider Column */}
                                     <div className="flex items-center space-x-3">
                                         <div className="flex-shrink-0">
-                                            <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium border border-blue-300">
-                                                {ticket.driver.split(' ').map(n => n[0]).join('')}
+                                            <div className="h-10 w-10 rounded-full bg-purple-500 flex items-center justify-center text-white text-sm font-medium border border-purple-300">
+                                                {ticket.rider.split(' ').map((n: string) => n[0]).join('')}
                                             </div>
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-semibold text-gray-900 truncate">{ticket.driver}</p>
+                                            <p className="text-sm font-semibold text-gray-900 truncate">{ticket.rider}</p>
                                             <div className="flex items-center space-x-2 mt-1">
                                                 <span className="text-xs text-gray-400">ID:</span>
-                                                <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                                                    {ticket.driverId}
+                                                <span className="text-xs font-medium text-purple-600 bg-purple-100 px-2 py-1 rounded">
+                                                    {ticket.riderId}
                                                 </span>
                                             </div>
                                             <div className="flex items-center space-x-1 mt-1">

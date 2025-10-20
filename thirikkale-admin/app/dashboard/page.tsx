@@ -12,6 +12,8 @@ import { LoadingProvider } from "@/components/providers/LoaderProvider"
 import { PageHeaderProvider, usePageHeader } from "@/components/providers/PageHeaderProvider"
 import { useSearchParams } from "next/navigation"
 import { Home, Users, Settings2, HandCoins, ChartColumn, Settings, UserRoundCheck, Star, Headset, UserCog, Activity } from "lucide-react"
+import { Car, BarChart3 } from "lucide-react"
+import { PiggyBank, Wallet } from "lucide-react"
 import Dash from "@/components/dashboards/Dash"
 import { TopNavBar } from "@/components/TopNavBar"
 
@@ -28,25 +30,44 @@ import FinanceManagement from "@/components/dashboards/admin/FinanceManagement"
 import RiderManagement from "@/components/dashboards/user-handler/RiderManagement"
 import DriverManagement from "@/components/dashboards/user-handler/DriverManagement"
 import VehicleManagement from "@/components/dashboards/user-handler/VehicleManagement"
-import VerificationQueue from "@/components/dashboards/user-handler/VerificationQueue"
-import ReportedUsers from "@/components/dashboards/user-handler/ReportedUsers"
+import RiderReports from "@/components/dashboards/user-handler/RiderReports"
+import DriverReports from "@/components/dashboards/user-handler/DriverReports"
 import UserStatistics from "@/components/dashboards/user-handler/UserStatistics"
 import SettingsPage from "@/components/dashboards/user-handler/Settings"
 
 // Trip and Support Agent components
-import TripManagement from "@/components/dashboards/trip-support/TripManagement"
-import SupportTickets from "@/components/dashboards/trip-support/SupportTickets"
+import LiveTrips from "@/components/dashboards/trip-support/LiveTrips"
+import TripHistory from "@/components/dashboards/trip-support/TripHistory"
+import RiderSupport from "@/components/dashboards/trip-support/RiderSupport"
 import DriverSupport from "@/components/dashboards/trip-support/DriverSupport"
+import EmergencyAlerts from "@/components/dashboards/trip-support/EmergencyAlerts"
+import DisputesResolutions from "@/components/dashboards/trip-support/ComplaintsResolutions"
+import TripSupportDash from "@/components/dashboards/trip-support/TripSupportDash"
+import TripAnalytics from "@/components/dashboards/trip-support/TripAnalytics"
 
 // Marketing & Report Handler components
-import MarketingCampaigns from "@/components/dashboards/marketing-handler/MarketingCampaigns"
-import ReportGeneration from "@/components/dashboards/marketing-handler/ReportGeneration"
 import DataAnalytics from "@/components/dashboards/marketing-handler/DataAnalytics"
+import PromotionCodes from "@/components/dashboards/marketing-handler/PromotionCodes"
+import MarketingHandlerSettings from "@/components/dashboards/marketing-handler/Settings"
+import PointRules from "@/components/dashboards/marketing-handler/PointRules"
+import RewardTiers from "@/components/dashboards/marketing-handler/RewardTiers"
+import UserPoints from "@/components/dashboards/marketing-handler/UserPoints"
+import RedemptionHistory from "@/components/dashboards/marketing-handler/RedemptionHistory"
+import ReferralPrograms from "@/components/dashboards/marketing-handler/ReferralPrograms"
+import SeasonalOffers from "@/components/dashboards/marketing-handler/SeasonalOffers"
+import PartnerCampaigns from "@/components/dashboards/marketing-handler/PartnerCampaigns"
+import Campaigns from "@/components/dashboards/marketing-handler/Campaigns"
+
 
 // Finance Handler components
-import PaymentManagement from "@/components/dashboards/finance-handler/PaymentManagement"
-import TransactionMonitoring from "@/components/dashboards/finance-handler/TransactionMonitoring"
-import FinancialReports from "@/components/dashboards/finance-handler/FinancialReports"
+import DriverToCompany from "@/components/dashboards/finance-handler/DriverToCompany"
+import CompanyToDriver from "@/components/dashboards/finance-handler/CompanyToDriver"
+import FinanceAnalytics from "@/components/dashboards/finance-handler/FinancialAnalytics"
+import CashTransactions from "@/components/dashboards/finance-handler/CashPayments"
+import CardTransactions from "@/components/dashboards/finance-handler/CardPayments"
+import FinanceHandlerDash from "@/components/dashboards/finance-handler/FinanceHandlerDash"
+import TripsPayments from "@/components/dashboards/finance-handler/TripsPayments"
+import FinanceHandlerSettings from "@/components/dashboards/finance-handler/Settings"
 
 // Map userType to available tabs - matches the sidebar configuration
 const tabConfig = {
@@ -69,29 +90,50 @@ const tabConfig = {
     { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: Settings },
     { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
     { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Headset },
+    { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
+    { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Settings2 },
     { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: Star },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
   TripSupport: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Settings2 },
-    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
+    { title: "Live Trips", url: "dashboard?tab=live-trips", icon: Settings2 },
+    { title: "Trip History", url: "dashboard?tab=trip-history", icon: Activity },
+    { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: Headset },
     { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+    { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
+    { title: "Disputes & Resolutions", url: "dashboard?tab=disputes-resolutions", icon: Settings },
+    { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Star },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumn },
-    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
-    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+    { title: "Campaigns", url: "dashboard?tab=campaigns", icon: ChartColumn },
+    { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
+    { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
+    { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
+    { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Activity },
+    { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
+    { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
+    { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
+    { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Activity },
+    { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Activity },
+    { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Activity },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
-    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
-    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumn },
+    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
+    { title: "Cash", url: "dashboard?tab=cash-transactions", icon: HandCoins },
+    { title: "Card", url: "dashboard?tab=card-transactions", icon: Activity },
+    { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: PiggyBank },
+    { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: Wallet },
+    { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 }
 
@@ -190,6 +232,12 @@ function DashboardContent() {
 
     // Handle Dashboard tabs
     if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {
+      if (userType === "TripSupport") {
+        return <TripSupportDash tab={tab} />
+      }
+      if (userType === "FinanceHandler") {
+        return <FinanceHandlerDash />
+      }
       return <Dash />
     }
 
@@ -232,11 +280,11 @@ function DashboardContent() {
       if (tabTitle === "Vehicle Management") {
         return <VehicleManagement />
       }
-      if (tabTitle === "Verification Queue") {
-        return <VerificationQueue />
+      if (tabTitle === "Rider Reports") {
+        return <RiderReports />
       }
-      if (tabTitle === "Reported Users") {
-        return <ReportedUsers />
+      if (tabTitle === "Driver Reports") {
+        return <DriverReports />
       }
       if (tabTitle === "User Statistics") {
         return <UserStatistics />
@@ -248,40 +296,92 @@ function DashboardContent() {
 
     // Handle TripSupport components
     if (userType === "TripSupport") {
-      if (tabTitle === "Trip Management") {
-        return <TripManagement />
+      if (tabTitle === "Live Trips") {
+        return <LiveTrips />
       }
-      if (tabTitle === "Support Tickets") {
-        return <SupportTickets />
+      if (tabTitle === "Trip History") {
+        return <TripHistory />
+      }
+      if (tabTitle === "Emergency Alerts") {
+        return <EmergencyAlerts />
       }
       if (tabTitle === "Driver Support") {
         return <DriverSupport />
+      }
+      if (tabTitle === "Rider Support") {
+        return <RiderSupport />
+      }
+      if (tabTitle === "Disputes & Resolutions") {
+        return <DisputesResolutions />
+      }
+      if (tabTitle === "Trip Analytics") {
+        return <TripAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <SettingsPage />
       }
     }
 
     // Handle MarketingHandler components
     if (userType === "MarketingHandler") {
-      if (tabTitle === "Marketing Campaigns") {
-        return <MarketingCampaigns />
+      // Removed EmailCampaigns, SMSCampaigns, PushNotifications
+      if (tabTitle === "Point Rules") {
+        return <PointRules />
       }
-      if (tabTitle === "Report Generation") {
-        return <ReportGeneration />
+      if (tabTitle === "Reward Tiers") {
+        return <RewardTiers />
+      }
+      if (tabTitle === "User Points") {
+        return <UserPoints />
+      }
+      if (tabTitle === "Redemption History") {
+        return <RedemptionHistory />
+      }
+      if (tabTitle === "Referral Programs") {
+        return <ReferralPrograms />
+      }
+      if (tabTitle === "Discount Codes") {
+        return <PromotionCodes />
+      }
+      if (tabTitle === "Seasonal Offers") {
+        return <SeasonalOffers />
+      }
+      if (tabTitle === "Campaigns") {
+        return <Campaigns />
+      }
+      if (tabTitle === "Partner Campaigns") {
+        return <PartnerCampaigns />
       }
       if (tabTitle === "Data Analytics") {
         return <DataAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <MarketingHandlerSettings />
       }
     }
 
     // Handle FinanceHandler components
     if (userType === "FinanceHandler") {
-      if (tabTitle === "Payment Management") {
-        return <PaymentManagement />
+      if (tabTitle === "Cash") {
+        return <CashTransactions />
       }
-      if (tabTitle === "Transaction Monitoring") {
-        return <TransactionMonitoring />
+      if (tabTitle === "Card") {
+        return <CardTransactions />
       }
-      if (tabTitle === "Financial Reports") {
-        return <FinancialReports />
+      if (tabTitle === "Driver to Company") {
+        return <DriverToCompany />
+      }
+      if (tabTitle === "Company to Driver") {
+        return <CompanyToDriver />
+      }
+      if (tabTitle === "Trips & Payments") {
+        return <TripsPayments />
+      }
+      if (tabTitle === "Financial Analytics" || tabTitle === "Reports & Analytics") {
+        return <FinanceAnalytics />
+      }
+      if (tabTitle === "Settings") {
+        return <FinanceHandlerSettings />
       }
     }
 

@@ -11,7 +11,6 @@ import {
   HandCoins,
   ChartColumnBig,
   Settings,
-  UserRoundCheck,
   Star,
   Headset,
   UserCog,
@@ -19,6 +18,21 @@ import {
   ChevronDown,
   PieChart,
   CarFront,
+  AlertTriangle,
+  MapPinned,
+  Clock,
+  BellRing,
+  Gavel,
+  CreditCard,
+  Banknote,
+  DollarSign,
+  BarChart3,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Tag,
+  Percent,
+  Calendar,
+  Handshake,
 } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
 import { usePathname, useSearchParams } from "next/navigation"
@@ -68,32 +82,92 @@ const sidebarConfig: Record<UserType, SidebarItem[]> = {
     { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
   ],
   UserHandler: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
     { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
     { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
     { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
-    { title: "Verification Queue", url: "dashboard?tab=verification-queue", icon: UserRoundCheck },
-    { title: "Reported Users", url: "dashboard?tab=reported-users", icon: Shield },
+    {
+      title: "Reported Users", url: "dashboard?tab=reported-users", icon: AlertTriangle,
+      children: [
+        { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
+        { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Car },
+      ],
+    },
     { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: PieChart },
     { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   TripSupport: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Trip Management", url: "dashboard?tab=trip-management", icon: Car },
-    { title: "Support Tickets", url: "dashboard?tab=support-tickets", icon: Headset },
-    { title: "Driver Support", url: "dashboard?tab=driver-support", icon: UserCog },
+    { title: "Dashboard Overview", url: "dashboard", icon: Home },
+    { title: "Live Trips", url: "dashboard?tab=live-trips", icon: MapPinned },
+    { title: "Trip History", url: "dashboard?tab=trip-history", icon: Clock },
+    { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: BellRing },
+    {
+      title: "Support Tickets",
+      icon: Headset,
+      children: [
+        { title: "Driver Support", url: "dashboard?tab=driver-support", icon: Car },
+        { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
+      ],
+    },
+    { title: "Complaints & Resolution", url: "dashboard?tab=disputes-resolutions", icon: Gavel },
+    { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Activity },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   MarketingHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Marketing Campaigns", url: "dashboard?tab=marketing-campaigns", icon: ChartColumnBig },
-    { title: "Report Generation", url: "dashboard?tab=report-generation", icon: Activity },
-    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: Star },
+    { title: "Campaigns", url: "dashboard?tab=campaigns", icon: ChartColumnBig },
+    {
+      title: "Loyalty Programs",
+      icon: Star,
+      children: [
+        { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
+        { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
+        { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
+        { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Clock },
+      ],
+    },
+    {
+      title: "Referral Rewards",
+      icon: HandCoins,
+      children: [
+        { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
+        { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
+        { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
+      ],
+    },
+    {
+      title: "Promotions",
+      icon: Tag,
+      children: [
+        { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Percent },
+        { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Calendar },
+        { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Handshake },
+      ],
+    },
+    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
   FinanceHandler: [
     { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Payment Management", url: "dashboard?tab=payment-management", icon: HandCoins },
-    { title: "Transaction Monitoring", url: "dashboard?tab=transaction-monitoring", icon: Activity },
-    { title: "Financial Reports", url: "dashboard?tab=financial-reports", icon: ChartColumnBig },
+    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
+    {
+      title: "Payment Management",
+      icon: HandCoins,
+      children: [
+        { title: "Cash", url: "dashboard?tab=cash-transactions", icon: Banknote },
+        { title: "Card", url: "dashboard?tab=card-transactions", icon: CreditCard },
+      ],
+    },
+    {
+      title: "Driver Payouts",
+      icon: DollarSign,
+      children: [
+        { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: ArrowUpRight },
+        { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: ArrowDownLeft },
+      ]
+    },
+    { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
+    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
   ],
 }
 

@@ -1,8 +1,6 @@
 // app/api/auth/[...nextauth]/route.ts (or similar file depending on your setup)
 
 import NextAuth from "next-auth"
-import { DefaultSession } from "next-auth"
-import { ZodError } from "zod"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "@/lib/zod" // Zod schema to validate login form
 // import { saltAndHashPassword } from "@/utils/password" // Optional: to hash passwords
