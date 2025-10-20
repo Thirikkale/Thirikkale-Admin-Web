@@ -16,7 +16,6 @@ import { Car, BarChart3 } from "lucide-react"
 import { PiggyBank, Wallet } from "lucide-react"
 import Dash from "@/components/dashboards/Dash"
 import { TopNavBar } from "@/components/TopNavBar"
-import { TopNavBar } from "@/components/TopNavBar"
 
 // Admin components
 import Analytics from "@/components/dashboards/admin/Analytics"
@@ -24,8 +23,6 @@ import AdminDriverManagement from "@/components/dashboards/admin/DriverManagemen
 import Pricing from "@/components/dashboards/admin/Pricing"
 import AdminRiderManagement from "@/components/dashboards/admin/RiderManagement"
 import SystemSettings from "@/components/dashboards/admin/SystemSettings"
-import AdminManagement from "@/components/dashboards/admin/AdminManagement"
-import FinanceManagement from "@/components/dashboards/admin/FinanceManagement"
 import AdminManagement from "@/components/dashboards/admin/AdminManagement"
 import FinanceManagement from "@/components/dashboards/admin/FinanceManagement"
 
@@ -171,7 +168,6 @@ export default function Page() {
       const isValidTab = tabs.some(t =>
         t.url.endsWith(`tab=${tab}`)
       )
-
 
       if (!isValidTab) {
         router.push("/dashboard")
