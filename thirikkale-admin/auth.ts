@@ -1,5 +1,7 @@
 // app/api/auth/[...nextauth]/route.ts (or similar file depending on your setup)
 
+// app/api/auth/[...nextauth]/route.ts (or similar file depending on your setup)
+
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "@/lib/zod" // Zod schema to validate login form
@@ -8,16 +10,23 @@ import type { Session, User } from "next-auth"
 import type { JWT } from "next-auth/jwt"
 
 // ✅ Initialize NextAuth
+// ✅ Initialize NextAuth
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    // ✅ Use credentials-based login
     // ✅ Use credentials-based login
     Credentials({
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        email: { label: "Email", type: "text" },
+        password: { label: "Password", type: "password" },
       },
       authorize: async (credentials) => {
         try {
+          console.log("Received credentials:", credentials)
+
+          // ✅ Validate with Zod
           console.log("Received credentials:", credentials)
 
           // ✅ Validate with Zod
@@ -76,6 +85,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return userDetails
         } catch (error) {
           console.error("Authorization error:", error)
+          console.error("Authorization error:", error)
           return null
         }
       },
@@ -85,11 +95,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   // ✅ Fallback secret for JWT
   secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret",
 
+
+  // ✅ Fallback secret for JWT
+  secret: process.env.NEXTAUTH_SECRET || "your-fallback-secret",
+
   session: {
+    strategy: "jwt", // Use JWT-based session (stateless)
     strategy: "jwt", // Use JWT-based session (stateless)
   },
 
+
   callbacks: {
+    // ✅ Called when JWT is created/updated
     // ✅ Called when JWT is created/updated
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
@@ -100,6 +117,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
 
     // ✅ Called whenever a session is checked on the client
+
+    // ✅ Called whenever a session is checked on the client
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
         session.jwt = token.jwt as string
@@ -107,9 +126,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user = {
           ...session.user,
           userType: token.userType as string,
+          userType: token.userType as string,
         }
       }
       return session
     },
   },
 })
+

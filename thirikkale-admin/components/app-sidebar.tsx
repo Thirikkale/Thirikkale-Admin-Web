@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import Link from "next/link"
+import Link from "next/link"
 import {
   Users,
   Shield,
@@ -54,6 +55,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 
 type UserType = "Admin" | "UserHandler" | "TripSupport" | "MarketingHandler" | "FinanceHandler"
 
@@ -65,111 +71,119 @@ type SidebarItem = {
 }
 
 const sidebarConfig: Record<UserType, SidebarItem[]> = {
-  Admin: [
-    { title: "Dashboard Overview", url: "dashboard", icon: Home },
-    {
-      title: "User Management",
-      icon: Users,
-      children: [
-        { title: "Admin Management", url: "dashboard?tab=admin-management", icon: UserCog },
-        { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
-        { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
-      ],
-    },
-    { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
-    { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumnBig },
-    { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Shield },
-    { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
-  ],
-  UserHandler: [
-    { title: "Dashboard Overview", url: "dashboard", icon: Home },
-    { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
-    { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
-    { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
-    {
-      title: "Reported Users", url: "dashboard?tab=reported-users", icon: AlertTriangle,
-      children: [
-        { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
-        { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Car },
-      ],
-    },
-    { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: PieChart },
-    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
-  ],
-  TripSupport: [
-    { title: "Dashboard Overview", url: "dashboard", icon: Home },
-    { title: "Live Trips", url: "dashboard?tab=live-trips", icon: MapPinned },
-    { title: "Trip History", url: "dashboard?tab=trip-history", icon: Clock },
-    { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: BellRing },
-    {
-      title: "Support Tickets",
-      icon: Headset,
-      children: [
-        { title: "Driver Support", url: "dashboard?tab=driver-support", icon: Car },
-        { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
-      ],
-    },
-    { title: "Complaints & Resolution", url: "dashboard?tab=disputes-resolutions", icon: Gavel },
-    { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Activity },
-    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
-  ],
-  MarketingHandler: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Campaigns", url: "dashboard?tab=campaigns", icon: ChartColumnBig },
-    {
-      title: "Loyalty Programs",
-      icon: Star,
-      children: [
-        { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
-        { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
-        { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
-        { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Clock },
-      ],
-    },
-    {
-      title: "Referral Rewards",
-      icon: HandCoins,
-      children: [
-        { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
-        { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
-        { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
-      ],
-    },
-    {
-      title: "Promotions",
-      icon: Tag,
-      children: [
-        { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Percent },
-        { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Calendar },
-        { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Handshake },
-      ],
-    },
-    { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
-    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
-  ],
-  FinanceHandler: [
-    { title: "Dashboard", url: "dashboard", icon: Home },
-    { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
-    {
-      title: "Payment Management",
-      icon: HandCoins,
-      children: [
-        { title: "Cash", url: "dashboard?tab=cash-transactions", icon: Banknote },
-        { title: "Card", url: "dashboard?tab=card-transactions", icon: CreditCard },
-      ],
-    },
-    {
-      title: "Driver Payouts",
-      icon: DollarSign,
-      children: [
-        { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: ArrowUpRight },
-        { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: ArrowDownLeft },
-      ]
-    },
-    { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
-    { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
-  ],
-}
+  type SidebarItem = {
+    title: string
+  url?: string
+  icon: React.ElementType
+  children?: SidebarItem[]
+  }
+
+const sidebarConfig: Record<UserType, SidebarItem[]> = {
+    Admin: [
+      { title: "Dashboard Overview", url: "dashboard", icon: Home },
+      {
+        title: "User Management",
+        icon: Users,
+        children: [
+          { title: "Admin Management", url: "dashboard?tab=admin-management", icon: UserCog },
+          { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
+          { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
+        ],
+      },
+      { title: "Finance Management", url: "dashboard?tab=finance-management", icon: HandCoins },
+      { title: "Reports & Analytics", url: "dashboard?tab=reports-analytics", icon: ChartColumnBig },
+      { title: "Pricing & Policy Manage", url: "dashboard?tab=pricing-policy", icon: Shield },
+      { title: "System Settings", url: "dashboard?tab=system-settings", icon: Settings },
+    ],
+    UserHandler: [
+      { title: "Dashboard Overview", url: "dashboard", icon: Home },
+      { title: "Rider Management", url: "dashboard?tab=rider-management", icon: Users },
+      { title: "Driver Management", url: "dashboard?tab=driver-management", icon: Car },
+      { title: "Vehicle Management", url: "dashboard?tab=vehicle-management", icon: CarFront },
+      {
+        title: "Reported Users", url: "dashboard?tab=reported-users", icon: AlertTriangle,
+        children: [
+          { title: "Rider Reports", url: "dashboard?tab=rider-reports", icon: Users },
+          { title: "Driver Reports", url: "dashboard?tab=driver-reports", icon: Car },
+        ],
+      },
+      { title: "User Statistics", url: "dashboard?tab=user-statistics", icon: PieChart },
+      { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
+    ],
+    TripSupport: [
+      { title: "Dashboard Overview", url: "dashboard", icon: Home },
+      { title: "Live Trips", url: "dashboard?tab=live-trips", icon: MapPinned },
+      { title: "Trip History", url: "dashboard?tab=trip-history", icon: Clock },
+      { title: "Emergency Alerts", url: "dashboard?tab=emergency-alerts", icon: BellRing },
+      {
+        title: "Support Tickets",
+        icon: Headset,
+        children: [
+          { title: "Driver Support", url: "dashboard?tab=driver-support", icon: Car },
+          { title: "Rider Support", url: "dashboard?tab=rider-support", icon: Users },
+        ],
+      },
+      { title: "Complaints & Resolution", url: "dashboard?tab=disputes-resolutions", icon: Gavel },
+      { title: "Trip Analytics", url: "dashboard?tab=trip-analytics", icon: Activity },
+      { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
+    ],
+    MarketingHandler: [
+      { title: "Dashboard", url: "dashboard", icon: Home },
+      { title: "Campaigns", url: "dashboard?tab=campaigns", icon: ChartColumnBig },
+      {
+        title: "Loyalty Programs",
+        icon: Star,
+        children: [
+          { title: "Point Rules", url: "dashboard?tab=point-rules", icon: Settings },
+          { title: "Reward Tiers", url: "dashboard?tab=reward-tiers", icon: BarChart3 },
+          { title: "User Points", url: "dashboard?tab=user-points", icon: Users },
+          { title: "Redemption History", url: "dashboard?tab=redemption-history", icon: Clock },
+        ],
+      },
+      {
+        title: "Referral Rewards",
+        icon: HandCoins,
+        children: [
+          { title: "Referral Users", url: "dashboard?tab=referral-users", icon: Users },
+          { title: "Referred Users", url: "dashboard?tab=referred-users", icon: UserCog },
+          { title: "Referral Programs", url: "dashboard?tab=referral-programs", icon: Settings },
+        ],
+      },
+      {
+        title: "Promotions",
+        icon: Tag,
+        children: [
+          { title: "Discount Codes", url: "dashboard?tab=discount-codes", icon: Percent },
+          { title: "Seasonal Offers", url: "dashboard?tab=seasonal-offers", icon: Calendar },
+          { title: "Partner Campaigns", url: "dashboard?tab=partner-promotions", icon: Handshake },
+        ],
+      },
+      { title: "Data Analytics", url: "dashboard?tab=data-analytics", icon: BarChart3 },
+      { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
+    ],
+    FinanceHandler: [
+      { title: "Dashboard", url: "dashboard", icon: Home },
+      { title: "Trips & Payments", url: "dashboard?tab=trips-payments", icon: Car },
+      {
+        title: "Payment Management",
+        icon: HandCoins,
+        children: [
+          { title: "Cash", url: "dashboard?tab=cash-transactions", icon: Banknote },
+          { title: "Card", url: "dashboard?tab=card-transactions", icon: CreditCard },
+        ],
+      },
+      {
+        title: "Driver Payouts",
+        icon: DollarSign,
+        children: [
+          { title: "Driver to Company", url: "dashboard?tab=driver-payouts-driver-to-company", icon: ArrowUpRight },
+          { title: "Company to Driver", url: "dashboard?tab=driver-payouts-company-to-driver", icon: ArrowDownLeft },
+        ]
+      },
+      { title: "Financial Analytics", url: "dashboard?tab=financial-analytics", icon: BarChart3 },
+      { title: "Settings", url: "dashboard?tab=settings", icon: Settings },
+    ],
+  }
 
 // This is sample data.
 const data = {
@@ -189,6 +203,16 @@ export function AppSidebar({
   const searchParams = useSearchParams()
   const sidebarContext = useSidebar();
   const isCollapsed = sidebarContext.state === "expanded" ? false : true;
+
+  // State to manage which collapsible items are open
+  const [openItems, setOpenItems] = React.useState<string[]>([])
+
+  // Close all collapsible items when sidebar collapses
+  React.useEffect(() => {
+    if (isCollapsed) {
+      setOpenItems([])
+    }
+  }, [isCollapsed])
 
   // State to manage which collapsible items are open
   const [openItems, setOpenItems] = React.useState<string[]>([])
@@ -261,107 +285,178 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" className="border-r border-gray-200 bg-white" {...props}>
       <SidebarHeader className="pb-4 pt-6 flex justify-center border-b border-gray-100">
-        <div
-          style={{
-            transition: "opacity 0.3s, width 0.3s",
-            opacity: isCollapsed ? 0 : 1,
-            width: isCollapsed ? 0 : "100%",
-            overflow: "hidden",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+        <Sidebar collapsible="icon" className="border-r border-gray-200 bg-white" {...props}>
+          <SidebarHeader className="pb-4 pt-6 flex justify-center border-b border-gray-100">
+            <div
+              style={{
+                transition: "opacity 0.3s, width 0.3s",
+                opacity: isCollapsed ? 0 : 1,
+                width: isCollapsed ? 0 : "100%",
+                overflow: "hidden",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
         >
-          {!isCollapsed && (
-            <Image
-              src="/ThirikkaleMain.svg"
-              alt="App Logo"
-              width={140}
-              height={58}
-              style={{ width: 140, height: "auto" }}
-              priority
-              unoptimized
-            />
-          )}
-        </div>
-        {/* <TeamSwitcher teams={data.teams} /> */}
-      </SidebarHeader>
-      <SidebarContent className="overflow-hidden px-2">
-        <SidebarGroup className="pt-0">
-          <SidebarMenu className="overflow-y-auto overflow-x-hidden space-y-1">
-            {items.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                {item.children ? (
-                  // Render collapsible menu for items with children
-                  <Collapsible
-                    open={!isCollapsed && openItems.includes(item.title)}
-                    onOpenChange={() => !isCollapsed && toggleItem(item.title)}
-                    className="w-full"
-                  >
-                    <CollapsibleTrigger asChild>
-                      <SidebarMenuButton
-                        tooltip={isCollapsed ? item.title : undefined}
-                        size="lg"
-                        className={`w-full h-12 rounded-lg sidebar-item ${isCollapsed ? 'justify-center' : 'px-3 py-2'} ${isChildActive(item.children)
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                          : 'hover:bg-gray-50 text-gray-700'
-                          }`}
-                      >
-                        <item.icon className="h-5 w-5 shrink-0" />
-                        {!isCollapsed && (
-                          <>
-                            <span className="truncate font-medium text-sm">{item.title}</span>
-                            <ChevronDown className={`ml-auto h-4 w-4 sidebar-chevron ${openItems.includes(item.title) ? 'sidebar-chevron-open' : ''}`} />
-                          </>
-                        )}
-                      </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className={`sidebar-dropdown-content ${openItems.includes(item.title) ? 'sidebar-dropdown-open' : ''}`}>
-                      <SidebarMenu className="ml-6 mt-1 space-y-1">
-                        {item.children.map((child) => (
-                          <SidebarMenuItem key={child.title} className="sidebar-dropdown-item">
-                            <SidebarMenuButton asChild className="w-full">
-                              <Link
-                                href={child.url || "#"}
-                                className={`h-10 rounded-lg px-3 py-2 flex items-center gap-3 text-sm font-medium sidebar-item ${isActive(child.url)
-                                  ? "bg-blue-500 text-white shadow-sm"
-                                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              {!isCollapsed && (
+                <Image
+                  src="/ThirikkaleMain.svg"
+                  alt="App Logo"
+                  width={140}
+                  height={58}
+                  style={{ width: 140, height: "auto" }}
+                  width={140}
+                  height={58}
+                  style={{ width: 140, height: "auto" }}
+                  priority
+                  unoptimized
+                  unoptimized
+                />
+              )}
+            </div>
+            {/* <TeamSwitcher teams={data.teams} /> */}
+          </SidebarHeader>
+          <SidebarContent className="overflow-hidden px-2">
+            <SidebarContent className="overflow-hidden px-2">
+              <SidebarGroup className="pt-0">
+                <SidebarMenu className="overflow-y-auto overflow-x-hidden space-y-1">
+                  <SidebarMenu className="overflow-y-auto overflow-x-hidden space-y-1">
+                    {items.map((item) => (
+                      <SidebarMenuItem key={item.title}>
+                        {item.children ? (
+                          // Render collapsible menu for items with children
+                          <Collapsible
+                            open={!isCollapsed && openItems.includes(item.title)}
+                            onOpenChange={() => !isCollapsed && toggleItem(item.title)}
+                            className="w-full"
+                          >
+                            <CollapsibleTrigger asChild>
+                              <SidebarMenuButton
+                                tooltip={isCollapsed ? item.title : undefined}
+                                size="lg"
+                                className={`w-full h-12 rounded-lg sidebar-item ${isCollapsed ? 'justify-center' : 'px-3 py-2'} ${isChildActive(item.children)
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : 'hover:bg-gray-50 text-gray-700'
                                   }`}
                               >
-                                <child.icon className="h-4 w-4 shrink-0" />
-                                <span className="truncate">{child.title}</span>
-                              </Link>
-                            </SidebarMenuButton>
-                          </SidebarMenuItem>
-                        ))}
-                      </SidebarMenu>
-                    </CollapsibleContent>
-                  </Collapsible>
-                ) : (
-                  // Render regular menu item
-                  <SidebarMenuButton asChild className="w-full" tooltip={isCollapsed ? item.title : undefined} size="lg">
-                    <Link
-                      href={item.url || "#"}
-                      onClick={handleItemClick}
-                      className={`h-12 rounded-lg flex items-center text-sm font-medium sidebar-item ${isCollapsed ? 'justify-center px-2' : 'px-3 py-2 gap-3'} ${isActive(item.url)
-                        ? "bg-blue-500 text-white shadow-sm"
-                        : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                        }`}
-                    >
+                                <item.icon className="h-5 w-5 shrink-0" />
+                                {!isCollapsed && (
+                                  <>
+                                    <span className="truncate font-medium text-sm">{item.title}</span>
+                                    <ChevronDown className={`ml-auto h-4 w-4 sidebar-chevron ${openItems.includes(item.title) ? 'sidebar-chevron-open' : ''}`} />
+                                  </>
+                                )}
+                              </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className={`sidebar-dropdown-content ${openItems.includes(item.title) ? 'sidebar-dropdown-open' : ''}`}>
+                              <SidebarMenu className="ml-6 mt-1 space-y-1">
+                                {item.children.map((child) => (
+                                  <SidebarMenuItem key={child.title} className="sidebar-dropdown-item">
+                                    <SidebarMenuButton asChild className="w-full">
+                                      <Link
+                                        href={child.url || "#"}
+                                        className={`h-10 rounded-lg px-3 py-2 flex items-center gap-3 text-sm font-medium sidebar-item ${isActive(child.url)
+                                          ? "bg-blue-500 text-white shadow-sm"
+                                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                          }`}
+                                      >
+                                        <child.icon className="h-4 w-4 shrink-0" />
+                                        <span className="truncate">{child.title}</span>
+                                      </Link>
+                                    </SidebarMenuButton>
+                                  </SidebarMenuItem>
+                                ))}
+                              </SidebarMenu>
+                            </CollapsibleContent>
+                          </Collapsible>
+                        ) : (
+                          // Render regular menu item
+                          <SidebarMenuButton asChild className="w-full" tooltip={isCollapsed ? item.title : undefined} size="lg">
+                            <Link
+                              href={item.url || "#"}
+                              onClick={handleItemClick}
+                              className={`h-12 rounded-lg flex items-center text-sm font-medium sidebar-item ${isCollapsed ? 'justify-center px-2' : 'px-3 py-2 gap-3'} ${isActive(item.url)
+                                ? "bg-blue-500 text-white shadow-sm"
+                                : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                                }`}
+                              {item.children ? (
+                                // Render collapsible menu for items with children
+                                <Collapsible
+                                  open={!isCollapsed && openItems.includes(item.title)}
+                                  onOpenChange={() => !isCollapsed && toggleItem(item.title)}
+                                  className="w-full"
+                                >
+                                  <CollapsibleTrigger asChild>
+                                    <SidebarMenuButton
+                                      tooltip={isCollapsed ? item.title : undefined}
+                                      size="lg"
+                                      className={`w-full h-12 rounded-lg sidebar-item ${isCollapsed ? 'justify-center' : 'px-3 py-2'} ${isChildActive(item.children)
+                                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                        : 'hover:bg-gray-50 text-gray-700'
+                                        }`}
+                                    >
+                                      <item.icon className="h-5 w-5 shrink-0" />
+                                      {!isCollapsed && (
+                                        <>
+                                          <span className="truncate font-medium text-sm">{item.title}</span>
+                                          <ChevronDown className={`ml-auto h-4 w-4 sidebar-chevron ${openItems.includes(item.title) ? 'sidebar-chevron-open' : ''}`} />
+                                        </>
+                                      )}
+                                    </SidebarMenuButton>
+                                  </CollapsibleTrigger>
+                                  <CollapsibleContent className={`sidebar-dropdown-content ${openItems.includes(item.title) ? 'sidebar-dropdown-open' : ''}`}>
+                                    <SidebarMenu className="ml-6 mt-1 space-y-1">
+                                      {item.children.map((child) => (
+                                        <SidebarMenuItem key={child.title} className="sidebar-dropdown-item">
+                                          <SidebarMenuButton asChild className="w-full">
+                                            <Link
+                                              href={child.url || "#"}
+                                              className={`h-10 rounded-lg px-3 py-2 flex items-center gap-3 text-sm font-medium sidebar-item ${isActive(child.url)
+                                                ? "bg-blue-500 text-white shadow-sm"
+                                                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                                }`}
+                                            >
+                                              <child.icon className="h-4 w-4 shrink-0" />
+                                              <span className="truncate">{child.title}</span>
+                                            </Link>
+                                          </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                      ))}
+                                    </SidebarMenu>
+                                  </CollapsibleContent>
+                                </Collapsible>
+                              ) : (
+                                // Render regular menu item
+                                <SidebarMenuButton asChild className="w-full" tooltip={isCollapsed ? item.title : undefined} size="lg">
+                                  <Link
+                                    href={item.url || "#"}
+                                    onClick={handleItemClick}
+                                    className={`h-12 rounded-lg flex items-center text-sm font-medium sidebar-item ${isCollapsed ? 'justify-center px-2' : 'px-3 py-2 gap-3'} ${isActive(item.url)
+                                      ? "bg-blue-500 text-white shadow-sm"
+                                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                                      }`}
+                                  >
+                                    <item.icon className="h-5 w-5 shrink-0" />
+                                    {!isCollapsed && <span className="truncate">{item.title}</span>}
+                                  </Link>
+                                </SidebarMenuButton>
+                              )}
                       <item.icon className="h-5 w-5 shrink-0" />
-                      {!isCollapsed && <span className="truncate">{item.title}</span>}
-                    </Link>
+                            {!isCollapsed && <span className="truncate">{item.title}</span>}
+                          </Link>
                   </SidebarMenuButton>
-                )}
-              </SidebarMenuItem>
+                    )}
+                  </SidebarMenuItem>
             ))}
-          </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
-      <SidebarFooter className="border-t border-gray-100 p-4">
-        <NavUser user={data.user} />
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
-  )
+                </SidebarMenu>
+              </SidebarGroup>
+            </SidebarContent>
+            <SidebarFooter className="border-t border-gray-100 p-4">
+              <SidebarFooter className="border-t border-gray-100 p-4">
+                <NavUser user={data.user} />
+              </SidebarFooter>
+              <SidebarRail />
+            </Sidebar>
+            )
 }
