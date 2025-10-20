@@ -478,6 +478,7 @@ const TripsPayments = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-gray-900 truncate">{trip.riderName}</p>
+                                                <span className="text-xs text-gray-400">ID:</span>
                                                 <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded">
                                                     {trip.riderReadableId || trip.riderId.slice(0, 8)}
                                                 </span>
@@ -493,6 +494,7 @@ const TripsPayments = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-semibold text-gray-900 truncate">{trip.driverName}</p>
+                                                <span className="text-xs text-gray-400">ID:</span>
                                                 <span className="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-1 rounded">
                                                     {trip.driverReadableId || trip.driverId.slice(0, 8)}
                                                 </span>

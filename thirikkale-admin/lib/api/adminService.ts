@@ -44,7 +44,7 @@ export interface Driver {
   faceMatchScore?: number;
   faceVerificationAttempts: number;
   totalEarnings: number;
-  totalRidesCompleted: number;
+  totalRides: number; // AdminService maps totalRidesCompleted to totalRides
   rating: number;
   isActive: boolean;
   isPhoneVerified: boolean;
@@ -575,7 +575,8 @@ function buildDocumentUrl(filename: string | null | undefined): string | undefin
  */
 export function mapDriverToFrontend(driver: Driver) {
   return {
-    id: driver.driverId || '',
+    id: driver.readableId || driver.driverId || '', // Use readable ID (D00001) if available, fallback to UUID
+    readableId: driver.readableId, // Store readable ID separately
     name: `${driver.firstName} ${driver.lastName}`,
     firstName: driver.firstName,
     lastName: driver.lastName,
@@ -588,9 +589,9 @@ export function mapDriverToFrontend(driver: Driver) {
     status: getDriverStatus(driver),
     createdTime: new Date(driver.createdAt).toLocaleString(),
     avatar: getVehicleEmoji(driver.vehicleType),
-    rating: driver.rating,
-    totalRides: driver.totalRidesCompleted,
-    totalEarnings: driver.totalEarnings,
+    rating: driver.rating || 0,
+    totalRides: driver.totalRides || 0, // Now properly mapped from backend's totalRidesCompleted
+    totalEarnings: driver.totalEarnings || 0,
     isVerified: driver.isVerified,
     isAvailable: driver.isAvailable,
     verificationProgress: driver.verificationProgress,
@@ -652,7 +653,8 @@ function getVehicleEmoji(vehicleType?: string): string {
  */
 export function mapRiderToFrontend(rider: Rider) {
   return {
-    id: rider.riderId,
+    id: rider.readableId || rider.riderId, // Use readable ID (R00001) if available, fallback to UUID
+    readableId: rider.readableId, // Store readable ID separately
     name: `${rider.firstName} ${rider.lastName}`,
     firstName: rider.firstName,
     lastName: rider.lastName,
@@ -682,6 +684,7 @@ export interface AdminRegistrationRequest {
 
 export interface AdminRegistrationResponse {
   adminId: string;
+  readableId?: string; // A00001, A00002 - Human-readable admin ID
   email: string;
   firstName: string;
   lastName: string;
@@ -696,6 +699,7 @@ export interface AdminRegistrationResponse {
 
 export interface AdminListItem {
   id: string;
+  readableId?: string; // A00001, A00002 - for display
   name: string;
   email: string;
   phone: string;
@@ -733,6 +737,249 @@ export async function registerAdmin(adminData: AdminRegistrationRequest): Promis
     console.error('Error registering admin:', error);
     throw error;
   }
+}
+
+// ==================== Payment Interfaces ====================
+
+export interface DriverPayoutSummary {
+  driverId: string;
+  driverReadableId: string; // D00001
+  driverName: string;
+  driverEmail: string;
+  driverPhone: string;
+  
+  // Period info
+  periodStart: string;
+  periodEnd: string;
+  periodDescription: string; // "Week 1, Jan 2025"
+  
+  // Trip statistics
+  totalTrips: number;
+  completedTrips: number;
+  
+  // Payment breakdown
+  totalCashCollected: number; // Cash payments from riders
+  totalCardPayments: number; // Card/digital payments
+  totalEarnings: number; // Total revenue (cash + card)
+  
+  // Commission
+  totalCommission: number; // Platform fee
+  commissionRate: number; // 15.00
+  
+  // Final calculation
+  amountOwedToCompany: number; // Cash - Commission (what driver owes)
+  
+  // Status
+  payoutStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'DISPUTED';
+  lastPaymentDate?: string;
+  payoutId?: string; // P00001
+}
+
+/**
+ * Calculate driver payout summaries from payments
+ * Groups completed payments by driver and calculates what each driver owes to company
+ */
+export function calculateDriverPayouts(
+  payments: Payment[],
+  drivers: Driver[]
+): DriverPayoutSummary[] {
+  // Filter only COMPLETED payments
+  const completedPayments = payments.filter(p => p.status === 'COMPLETED');
+  
+  // Group by driver
+  const paymentsByDriver = completedPayments.reduce((acc, payment) => {
+    if (!payment.driverId) return acc;
+    
+    if (!acc[payment.driverId]) {
+      acc[payment.driverId] = [];
+    }
+    acc[payment.driverId].push(payment);
+    return acc;
+  }, {} as Record<string, Payment[]>);
+  
+  // Calculate summary for each driver
+  const summaries: DriverPayoutSummary[] = [];
+  
+  for (const [driverId, driverPayments] of Object.entries(paymentsByDriver)) {
+    const driver = drivers.find(d => d.driverId === driverId || d.readableId === driverId);
+    if (!driver) continue;
+    
+    // Calculate totals
+    const totalCashCollected = driverPayments
+      .filter(p => p.paymentMethod === 'CASH')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    const totalCardPayments = driverPayments
+      .filter(p => p.paymentMethod === 'CARD' || p.paymentMethod === 'DIGITAL_WALLET')
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    const totalCommission = driverPayments
+      .reduce((sum, p) => sum + (p.platformFee || 0), 0);
+    
+    const totalEarnings = totalCashCollected + totalCardPayments;
+    
+    // Amount owed to company = Cash Collected - Commission
+    const amountOwedToCompany = totalCashCollected - totalCommission;
+    
+    // Get period info
+    const dates = driverPayments.map(p => new Date(p.completedAt || p.createdAt));
+    const periodStart = new Date(Math.min(...dates.map(d => d.getTime()))).toISOString();
+    const periodEnd = new Date(Math.max(...dates.map(d => d.getTime()))).toISOString();
+    
+    // Determine status
+    const payoutStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'DISPUTED' = 
+      amountOwedToCompany > 0 ? 'PENDING' : 'COMPLETED';
+    
+    summaries.push({
+      driverId: driver.driverId,
+      driverReadableId: driver.readableId || driver.driverId,
+      driverName: `${driver.firstName} ${driver.lastName}`,
+      driverEmail: driver.email,
+      driverPhone: driver.phoneNumber || '',
+      periodStart,
+      periodEnd,
+      periodDescription: `${new Date(periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+      totalTrips: driverPayments.length,
+      completedTrips: driverPayments.length,
+      totalCashCollected,
+      totalCardPayments,
+      totalEarnings,
+      totalCommission,
+      commissionRate: totalEarnings > 0 ? (totalCommission / totalEarnings) * 100 : 15.0,
+      amountOwedToCompany,
+      payoutStatus,
+      lastPaymentDate: periodEnd,
+    });
+  }
+  
+  return summaries.sort((a, b) => b.amountOwedToCompany - a.amountOwedToCompany);
+}
+
+// ==================== Company to Driver Payouts ====================
+
+/**
+ * Company to Driver Payout Summary
+ * Represents money company owes TO driver (their earnings from card payments)
+ */
+export interface CompanyToDriverPayout {
+  driverId: string;
+  driverReadableId: string; // D00001
+  driverName: string;
+  driverEmail: string;
+  driverPhone: string;
+  
+  // Period
+  periodStart: string;
+  periodEnd: string;
+  periodDescription: string; // "Jan 15-21, 2025"
+  
+  // Trip statistics
+  totalTrips: number;
+  completedTrips: number;
+  
+  // Payment breakdown
+  totalCashPayments: number; // Cash kept by driver
+  totalCardPayments: number; // Card payments processed by company
+  totalEarnings: number; // Total revenue
+  
+  // Commission
+  totalCommission: number; // Platform fee (15%)
+  commissionRate: number; // 15.00
+  
+  // Final calculation
+  amountToPayDriver: number; // Card payments - Commission (what company owes driver)
+  
+  // Status
+  payoutStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'DISPUTED';
+  lastPaymentDate?: string;
+  payoutId?: string;
+}
+
+/**
+ * Calculate company-to-driver payouts
+ * Shows how much company owes each driver (card payments minus commission)
+ */
+export function calculateCompanyToDriverPayouts(
+  payments: Payment[],
+  drivers: Driver[]
+): CompanyToDriverPayout[] {
+  // Filter only COMPLETED payments
+  const completedPayments = payments.filter(p => p.status === 'COMPLETED');
+  
+  // Group by driver
+  const paymentsByDriver = completedPayments.reduce((acc, payment) => {
+    if (!payment.driverId) return acc;
+    
+    if (!acc[payment.driverId]) {
+      acc[payment.driverId] = [];
+    }
+    acc[payment.driverId].push(payment);
+    return acc;
+  }, {} as Record<string, Payment[]>);
+  
+  // Calculate summary for each driver
+  const summaries: CompanyToDriverPayout[] = [];
+  
+  for (const [driverId, driverPayments] of Object.entries(paymentsByDriver)) {
+    const driver = drivers.find(d => d.driverId === driverId || d.readableId === driverId);
+    if (!driver) continue;
+    
+    // Filter ONLY CARD/DIGITAL_WALLET payments (not cash)
+    const cardPaymentsOnly = driverPayments.filter(
+      p => p.paymentMethod === 'CARD' || p.paymentMethod === 'DIGITAL_WALLET'
+    );
+    
+    // Skip drivers with no card payments
+    if (cardPaymentsOnly.length === 0) continue;
+    
+    // Calculate totals - ONLY CARD PAYMENTS
+    const totalCardPayments = cardPaymentsOnly
+      .reduce((sum, p) => sum + p.amount, 0);
+    
+    // For card-only payout: commission is 15% of card payments only
+    const commissionRate = 0.15;
+    const totalCommission = totalCardPayments * commissionRate;
+    
+    // Amount company owes driver = Card payments - Commission (on card only)
+    // Company processes card payments and pays driver 85% (100% - 15% commission)
+    const amountToPayDriver = totalCardPayments - totalCommission;
+    
+    // Cash is NOT considered in company-to-driver payouts (driver keeps cash directly)
+    const totalCashPayments = 0; // Not used in this payout type
+    const totalEarnings = totalCardPayments; // Only card earnings matter here
+    
+    // Determine period (only from card payments)
+    const dates = cardPaymentsOnly.map(p => new Date(p.completedAt || p.createdAt));
+    const periodStart = new Date(Math.min(...dates.map(d => d.getTime()))).toISOString();
+    const periodEnd = new Date(Math.max(...dates.map(d => d.getTime()))).toISOString();
+    
+    // Determine status (simplified - in real app would check actual payout records)
+    const payoutStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'DISPUTED' = 
+      amountToPayDriver > 100 ? 'PENDING' : 'COMPLETED';
+    
+    summaries.push({
+      driverId: driver.driverId,
+      driverReadableId: driver.readableId || driver.driverId,
+      driverName: `${driver.firstName} ${driver.lastName}`,
+      driverEmail: driver.email,
+      driverPhone: driver.phoneNumber || '',
+      periodStart,
+      periodEnd,
+      periodDescription: `${new Date(periodStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${new Date(periodEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+      totalTrips: cardPaymentsOnly.length,  // Only count card trips
+      completedTrips: cardPaymentsOnly.length,  // Only count card trips
+      totalCashPayments,
+      totalCardPayments,
+      totalEarnings,
+      totalCommission,
+      commissionRate: 15.0,
+      amountToPayDriver,
+      payoutStatus,
+      lastPaymentDate: periodEnd,
+    });
+  }
+  
+  return summaries.sort((a, b) => b.amountToPayDriver - a.amountToPayDriver);
 }
 
 /**
@@ -773,7 +1020,8 @@ export function mapAdminToFrontend(admin: AdminRegistrationResponse): AdminListI
   const displayRole = roleMapping[admin.adminRole] || admin.adminRole;
 
   return {
-    id: admin.adminId,
+    id: admin.readableId || admin.adminId, // Use readable ID if available, fallback to UUID
+    readableId: admin.readableId, // Store readable ID separately
     name: `${admin.firstName} ${admin.lastName}`,
     email: admin.email,
     phone: admin.phoneNumber,

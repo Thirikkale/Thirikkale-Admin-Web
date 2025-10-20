@@ -6,6 +6,7 @@ import { AlertCircle } from 'lucide-react'
 
 interface Driver {
   id: string
+  readableId?: string // D00001, D00002 - for display
   name: string
   city: string
   email: string
@@ -71,6 +72,8 @@ export default function DriverManagement() {
       } else if (response.data) {
         // Map backend data to frontend format
         const mappedDrivers = response.data.map(mapDriverToFrontend)
+        console.log('Mapped drivers:', mappedDrivers.slice(0, 2)) // Log first 2 drivers for debugging
+        console.log('Sample driver totalRides:', mappedDrivers[0]?.totalRides)
         setDrivers(mappedDrivers)
       }
     } catch (err) {
@@ -305,12 +308,11 @@ export default function DriverManagement() {
           <div className="overflow-hidden">
             {/* Table Header */}
             <div className="bg-gray-100 border-b-2 border-gray-300">
-              <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
+              <div className="grid gap-4 px-6 py-4" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1fr 1.2fr 1.5fr' }}>
                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Driver Info</div>
                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Email Address</div>
                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rating</div>
-                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Vehicle Type</div>
-                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Rides</div>
+                <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Total Rides</div>
                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Status</div>
                 <div className="text-center text-xs font-bold text-gray-700 uppercase tracking-wider">Actions</div>
               </div>
@@ -319,7 +321,7 @@ export default function DriverManagement() {
             {/* Driver Rows */}
             {filteredDrivers.map((driver) => (
               <div key={driver.id} className="border-b border-gray-200 bg-white hover:bg-gray-50 transition-colors">
-                <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1.5fr 1fr 1.2fr 1.5fr' }}>
+                <div className="grid gap-4 px-6 py-4 items-center" style={{ gridTemplateColumns: '2fr 2fr 0.8fr 1fr 1.2fr 1.5fr' }}>
                   {/* Driver Info Column */}
                   <div className="flex items-center space-x-3">
                     <div className="flex-shrink-0">
@@ -331,11 +333,10 @@ export default function DriverManagement() {
                       <div className="mb-1">
                         <p className="text-sm font-semibold text-gray-900 truncate">{driver.name}</p>
                       </div>
-                      <p className="text-xs text-gray-500 truncate">{driver.city}</p>
                       <div className="flex items-center space-x-2 mt-1">
                         <span className="text-xs text-gray-400">ID:</span>
-                        <span className="text-xs font-medium text-blue-600 bg-blue-100 px-2 py-1 rounded">
-                          {driver.id ? `${driver.id.substring(0, 8)}...` : 'N/A'}
+                        <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                          {driver.id || 'N/A'}
                         </span>
                       </div>
                       <p className="text-xs text-gray-400 truncate">{driver.createdTime}</p>
@@ -352,14 +353,11 @@ export default function DriverManagement() {
                     ⭐ {driver.rating.toFixed(1)}
                   </div>
 
-                  {/* Vehicle Type Column */}
-                  <div className="text-sm text-gray-700 truncate text-center" title={driver.vehicleType}>
-                    {driver.vehicleType}
-                  </div>
-
-                  {/* Rides Column */}
-                  <div className="text-sm text-gray-700 text-center">
-                    {driver.totalRides}
+                  {/* Total Rides Column */}
+                  <div className="text-center">
+                    <span className="inline-flex items-center px-3 py-1 text-sm font-semibold text-blue-700 bg-blue-50 rounded-full border border-blue-200">
+                      {driver.totalRides ?? 0} rides
+                    </span>
                   </div>
 
                   {/* Status Column */}

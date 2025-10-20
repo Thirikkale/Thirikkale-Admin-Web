@@ -535,6 +535,7 @@ export default function TripHistory() {
                                                             </div>
                                                             <div className="min-w-0 flex-1">
                                                                 <p className="text-xs font-semibold text-gray-900 truncate">{rider.name}</p>
+                                                                <span className="text-xs text-gray-400">ID:</span>
                                                                 <span className="text-xs font-semibold text-green-600 bg-green-100 px-1.5 py-0.5 rounded inline-block mt-0.5">
                                                                     {rider.id}
                                                                 </span>

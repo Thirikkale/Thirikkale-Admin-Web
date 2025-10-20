@@ -4,6 +4,7 @@ import { getAllRiders, mapRiderToFrontend } from '@/lib/api/adminService'
 
 interface Rider {
   id: string
+  readableId?: string // R00001, R00002 - for display
   name: string
   firstName: string
   lastName: string
@@ -328,7 +329,7 @@ export default function RiderManagement() {
                           <div className="flex items-center space-x-2">
                             <span className="text-xs text-gray-400">ID:</span>
                             <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                              {rider.id}
+                              {rider.id || 'N/A'}
                             </span>
                           </div>
                           <p className="text-xs text-gray-400 mt-1">Joined: {new Date(rider.createdTime).toLocaleDateString()}</p>
