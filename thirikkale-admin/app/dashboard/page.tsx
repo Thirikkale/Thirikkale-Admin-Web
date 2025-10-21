@@ -143,9 +143,45 @@ export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // Get userType from session
-  const userType = session?.user?.userType
+  // Get raw userType from session
+  const rawUserType = session?.user?.userType
   const tab = searchParams.get("tab") || "dashboard"
+
+  // Map backend userType (e.g., "ADMIN_ADMIN") to frontend format (e.g., "Admin")
+  const userType = useMemo(() => {
+    if (!rawUserType) return null
+    
+    console.log("📍 Page Component - Raw UserType:", rawUserType)
+    
+    // Backend format: "ADMIN_<ROLE>"
+    const rolePart = rawUserType.replace("ADMIN_", "")
+    
+    // Map to frontend tabConfig keys
+    let mappedType = null
+    switch (rolePart) {
+      case "ADMIN":
+        mappedType = "Admin"
+        break
+      case "USER_HANDLER":
+        mappedType = "UserHandler"
+        break
+      case "TRIP_SUPPORT":
+        mappedType = "TripSupport"
+        break
+      case "FINANCE_HANDLER":
+        mappedType = "FinanceHandler"
+        break
+      case "MARKETING_HANDLER":
+        mappedType = "MarketingHandler"
+        break
+      default:
+        console.warn("Unknown admin role:", rawUserType)
+        return null
+    }
+    
+    console.log("✅ Page Component - Mapped UserType:", mappedType)
+    return mappedType
+  }, [rawUserType])
 
   // FIRST useEffect: Authentication check
   useEffect(() => {
@@ -210,25 +246,78 @@ function DashboardContent() {
   const { pageHeader } = usePageHeader()
   const searchParams = useSearchParams()
   const { data: session } = useSession()
-  const userType = session?.user?.userType
+  const rawUserType = session?.user?.userType
   const tab = searchParams.get("tab") || "dashboard"
 
+  console.log("🔍 Dashboard Debug:", {
+    rawUserType,
+    session: session?.user,
+    tab
+  })
+
+  // Map backend userType (e.g., "ADMIN_ADMIN") to frontend format (e.g., "Admin")
+  const userType = useMemo(() => {
+    if (!rawUserType) {
+      console.log("⚠️ No rawUserType found")
+      return null
+    }
+    
+    // Backend format: "ADMIN_<ROLE>"
+    // Extract role part after "ADMIN_"
+    const rolePart = rawUserType.replace("ADMIN_", "")
+    
+    // Map to frontend tabConfig keys
+    let mappedType = null
+    switch (rolePart) {
+      case "ADMIN":
+        mappedType = "Admin"
+        break
+      case "USER_HANDLER":
+        mappedType = "UserHandler"
+        break
+      case "TRIP_SUPPORT":
+        mappedType = "TripSupport"
+        break
+      case "FINANCE_HANDLER":
+        mappedType = "FinanceHandler"
+        break
+      case "MARKETING_HANDLER":
+        mappedType = "MarketingHandler"
+        break
+      default:
+        console.warn("Unknown admin role:", rawUserType)
+        return null
+    }
+    
+    console.log("✅ Mapped userType:", rawUserType, "->", mappedType)
+    return mappedType
+  }, [rawUserType])
+
   const tabs = useMemo(() => {
-    return userType ? tabConfig[userType as keyof typeof tabConfig] : []
+    const result = userType ? tabConfig[userType as keyof typeof tabConfig] || [] : []
+    console.log("📋 Tabs for", userType, ":", result.length, "tabs")
+    return result
   }, [userType])
 
-  // Find the current tab config
+  // Find the current tab config with safety check
   const currentTab = tabs.find(t =>
     t.url === "dashboard"
       ? tab === "dashboard"
       : t.url.endsWith(`tab=${tab}`)
-  ) || tabs[0]
+  ) || tabs[0] || null
+
+  console.log("🎯 Current Tab:", currentTab?.title, "for tab param:", tab)
 
   // Render different components based on tab parameter and userType
   const renderTabComponent = () => {
-    if (!currentTab) return <Dash />
+    // Show loading or default dashboard if userType is not available yet
+    if (!userType || !currentTab) {
+      console.log("⚠️ Showing default Dash - userType:", userType, "currentTab:", currentTab)
+      return <Dash />
+    }
 
     const tabTitle = currentTab.title
+    console.log("🚀 Rendering component for:", tabTitle, "userType:", userType)
 
     // Handle Dashboard tabs
     if (tabTitle === "Dashboard" || tabTitle === "Dashboard Overview") {

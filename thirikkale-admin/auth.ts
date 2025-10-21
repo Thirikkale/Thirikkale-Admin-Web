@@ -24,68 +24,57 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          console.log("Received credentials:", credentials)
-
-          // ✅ Validate with Zod
-          console.log("Received credentials:", credentials)
+          console.log("🔐 Authenticating with backend API...")
 
           // ✅ Validate with Zod
           const { email, password } = await signInSchema.parseAsync(credentials)
 
-          // ✅ Simulated users
-          const mockUsers = [
-            {
-              email: "admin@gmail.com",
-              password: "123", // Plaintext for mock; use hash check in real use
-              userType: "Admin",
-            },
-            {
-              email: "userhandler@gmail.com",
-              password: "123",
-              userType: "UserHandler",
-            },
-            {
-              email: "tripsupport@gmail.com",
-              password: "123",
-              userType: "TripSupport",
-            },
-            {
-              email: "marketing@gmail.com",
-              password: "123",
-              userType: "MarketingHandler",
-            },
-            {
-              email: "finance@gmail.com",
-              password: "123",
-              userType: "FinanceHandler",
-            },
-          ]
+          // ✅ Call backend admin login API
+          // Use NEXT_PUBLIC_USER_SERVICE_URL from .env.local
+          const userServiceUrl = process.env.NEXT_PUBLIC_USER_SERVICE_URL || "http://localhost:8081/user-service"
+          const loginUrl = `${userServiceUrl}/api/v1/auth/admin/login`
+          
+          console.log("📡 Login URL:", loginUrl)
+          console.log("📧 Email:", email)
 
-          // ✅ Find matching user
-          const foundUser = mockUsers.find(
-            (user) => user.email === email && user.password === password
-          )
+          const response = await fetch(loginUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              emailOrPhone: email,
+              password: password,
+            }),
+          })
 
-          if (!foundUser) {
-            console.warn("Invalid credentials")
+          console.log("📊 Response status:", response.status)
+
+          if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}))
+            console.error("❌ Login failed:", response.status, errorData)
             return null
           }
 
-          // ✅ Optional: simulate hashing (not used in mock check)
-          // const hashedPassword = await saltAndHashPassword(foundUser.password)
+          const data = await response.json()
+          console.log("✅ Login successful! User type:", data.userType)
 
+          // ✅ Map backend response to NextAuth user format
           const userDetails = {
-            id: foundUser.email, // NextAuth requires an id field
-            email: foundUser.email,
-            userType: foundUser.userType,
-            jwt: "test-jwt-token", // Mock token for testing
+            id: data.userId, // NextAuth requires an id field
+            email: data.email,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phoneNumber: data.phoneNumber,
+            userType: data.userType, // e.g., "ADMIN_ADMIN", "ADMIN_FINANCE_HANDLER"
+            jwt: data.accessToken,
+            refreshToken: data.refreshToken,
           }
 
-          console.log("Authorized user:", userDetails)
+          console.log("👤 Authorized user:", userDetails.email, userDetails.userType)
           return userDetails
         } catch (error) {
-          console.error("Authorization error:", error)
-          console.error("Authorization error:", error)
+          console.error("💥 Authorization error:", error)
           return null
         }
       },
@@ -107,25 +96,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     // ✅ Called when JWT is created/updated
-    // ✅ Called when JWT is created/updated
     async jwt({ token, user }: { token: JWT; user?: User }) {
       if (user) {
         token.jwt = (user as User & { jwt?: string }).jwt
+        token.refreshToken = (user as User & { refreshToken?: string }).refreshToken
         token.userType = (user as User & { userType?: string }).userType
+        token.firstName = (user as User & { firstName?: string }).firstName
+        token.lastName = (user as User & { lastName?: string }).lastName
+        token.phoneNumber = (user as User & { phoneNumber?: string }).phoneNumber
       }
       return token
     },
 
     // ✅ Called whenever a session is checked on the client
-
-    // ✅ Called whenever a session is checked on the client
     async session({ session, token }: { session: Session; token: JWT }) {
       if (token) {
         session.jwt = token.jwt as string
+        session.refreshToken = token.refreshToken as string
         session.userType = token.userType as string
         session.user = {
           ...session.user,
-          userType: token.userType as string,
+          firstName: token.firstName as string,
+          lastName: token.lastName as string,
+          phoneNumber: token.phoneNumber as string,
           userType: token.userType as string,
         }
       }

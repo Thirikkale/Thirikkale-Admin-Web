@@ -344,7 +344,6 @@ export default function AdminManagement() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select a role</option>
-                      <option value="Admin">Admin (Manager)</option>
                       <option value="User Handler">User Handler</option>
                       <option value="Finance Handler">Finance Handler</option>
                       <option value="Marketing Handler">Marketing Handler</option>
